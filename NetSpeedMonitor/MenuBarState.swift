@@ -23,6 +23,16 @@ enum NetSpeedUpdateInterval: Int, CaseIterable, Identifiable {
     }
 }
 
+enum SpeedUnit: String, CaseIterable, Identifiable {
+    case auto = "Auto"
+    case kb = "KB/s"
+    case mb = "MB/s"
+    case bytes = "B/s"
+    case bits = "bps"
+    
+    var id: String { self.rawValue }
+}
+
 class MenuBarState: ObservableObject {
     @AppStorage("AutoLaunchEnabled") var autoLaunchEnabled: Bool = false {
         didSet { updateAutoLaunchStatus() }
@@ -30,7 +40,10 @@ class MenuBarState: ObservableObject {
     @AppStorage("NetSpeedUpdateInterval") var netSpeedUpdateInterval: NetSpeedUpdateInterval = .Sec1 {
         didSet { updateNetSpeedUpdateIntervalStatus() }
     }
-    @Published var menuText = "↑ \(String(format: "%6.2lf", 0)) \(" B")/s\n↓ \(String(format: "%6.2lf", 0)) \(" B")/s"
+    @AppStorage("SpeedUnitSelection") var speedUnit: SpeedUnit = .auto {
+        didSet { updateNetSpeedUpdateIntervalStatus() }
+    }
+    @Published var menuText = "↑0.0B/s\n↓0.0B/s"
     
     var currentIcon: NSImage {
         return MenuBarIconGenerator.generateIcon(text: menuText)
@@ -39,12 +52,6 @@ class MenuBarState: ObservableObject {
     private var timer: Timer?
     private var primaryInterface: String?
     private var netTrafficStat = NetTrafficStatReceiver()
-    
-    private var uploadSpeed: Double = 0.0
-    private var downloadSpeed: Double = 0.0
-    private var uploadMetric: String = " B"
-    private var downloadMetric: String = " B"
-    private let speedMetrics: [String] = [" B", "KB", "MB", "GB", "TB"]
     
     private func currentAutoLaunchStatus() -> Bool {
         let service = SMAppService.mainApp
@@ -92,24 +99,54 @@ class MenuBarState: ObservableObject {
                 if (self.primaryInterface == nil) { return }
                 
                 if let netTrafficStatMap = self.netTrafficStat.getNetTrafficStatMap() {
-                    if let netTrafficStat = netTrafficStatMap.object(forKey: self.primaryInterface!) as? NetTrafficStatOC  {
-                        self.downloadSpeed = netTrafficStat.ibytes_per_sec as! Double
-                        self.uploadSpeed = netTrafficStat.obytes_per_sec as! Double
-                        self.downloadMetric = self.speedMetrics.first!
-                        self.uploadMetric = self.speedMetrics.first!
-                        for metric in self.speedMetrics.dropFirst() {
-                            if self.downloadSpeed > 1000.0 {
-                                self.downloadSpeed /= 1024.0
-                                self.downloadMetric = metric
-                            }
-                            if self.uploadSpeed > 1000.0 {
-                                self.uploadSpeed /= 1024.0
-                                self.uploadMetric = metric
-                            }
-                        }
-                        self.menuText = "↑ \(String(format: "%6.2lf", self.uploadSpeed)) \(self.uploadMetric)/s\n↓ \(String(format: "%6.2lf", self.downloadSpeed)) \(self.downloadMetric)/s"
+                    if let netTrafficStat = netTrafficStatMap.object(forKey: self.primaryInterface!) as? NetTrafficStat  {
+                        let rawDownload = netTrafficStat.ibytes_per_sec as! Double
+                        let rawUpload = netTrafficStat.obytes_per_sec as! Double
                         
-                        logger.info("deltaIn: \(String(format:"%.6f", self.downloadSpeed)) \(self.downloadMetric)/s, deltaOut: \(String(format:"%.6f", self.uploadSpeed)) \(self.uploadMetric)/s")
+                        var displayDownload = rawDownload
+                        var displayUpload = rawUpload
+                        var downUnit = ""
+                        var upUnit = ""
+                        
+                        switch self.speedUnit {
+                        case .auto:
+                            let metrics = ["B", "KB", "MB", "GB", "TB"]
+                            var downIdx = 0
+                            var upIdx = 0
+                            while displayDownload > 1000.0 && downIdx < metrics.count - 1 {
+                                displayDownload /= 1024.0
+                                downIdx += 1
+                            }
+                            while displayUpload > 1000.0 && upIdx < metrics.count - 1 {
+                                displayUpload /= 1024.0
+                                upIdx += 1
+                            }
+                            downUnit = metrics[downIdx]
+                            upUnit = metrics[upIdx]
+                        case .kb:
+                            displayDownload /= 1024.0
+                            displayUpload /= 1024.0
+                            downUnit = "KB"
+                            upUnit = "KB"
+                        case .mb:
+                            displayDownload /= (1024.0 * 1024.0)
+                            displayUpload /= (1024.0 * 1024.0)
+                            downUnit = "MB"
+                            upUnit = "MB"
+                        case .bytes:
+                            downUnit = "B"
+                            upUnit = "B"
+                        case .bits:
+                            displayDownload *= 8.0
+                            displayUpload *= 8.0
+                            downUnit = "b"
+                            upUnit = "b"
+                        }
+                        
+                        // Extremely compact format to remove extra spaces and format to 2 decimal places:
+                        self.menuText = "↑\(String(format: "%.2f", displayUpload))\(upUnit)\n↓\(String(format: "%.2f", displayDownload))\(downUnit)"
+                        
+                        logger.info("SpeedIn: \(displayDownload) \(downUnit), SpeedOut: \(displayUpload) \(upUnit)")
                     }
                 }
             }

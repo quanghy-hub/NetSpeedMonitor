@@ -1,7 +1,7 @@
 import SwiftUI
 import os.log
 
-public var logger = Logger(subsystem: Bundle.main.bundleIdentifier!, category: "elegracer")
+public var logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "com.elegracer.NetSpeedMonitor", category: "elegracer")
 
 struct MenuContentView: View {
     @EnvironmentObject var menuBarState: MenuBarState
@@ -35,6 +35,25 @@ struct MenuContentView: View {
                 }
             } header: {
                 Text("Update Interval")
+            }
+            
+            Divider()
+            
+            Section {
+                HStack {
+                    ForEach(SpeedUnit.allCases) { unit in
+                        Toggle(
+                            unit.rawValue,
+                            isOn: Binding(
+                                get: { menuBarState.speedUnit == unit },
+                                set: { if $0 { menuBarState.speedUnit = unit } }
+                            )
+                        )
+                        .toggleStyle(.button)
+                    }
+                }
+            } header: {
+                Text("Speed Unit")
             }
             
             Divider()
