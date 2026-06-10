@@ -12,6 +12,6 @@ struct NetSpeedMonitorApp: App {
             Image(nsImage: menuBarState.currentIcon)
                 .tag("MenuBarIcon")
         }
-        .menuBarExtraStyle(.menu)
+        .menuBarExtraStyle(.window)
     }
 }

@@ -43,15 +43,55 @@ class MenuBarState: ObservableObject {
     @AppStorage("SpeedUnitSelection") var speedUnit: SpeedUnit = .auto {
         didSet { updateNetSpeedUpdateIntervalStatus() }
     }
-    @Published var menuText = "↑0.0B/s\n↓0.0B/s"
+    
+    // System Monitor Settings
+    @AppStorage("ShowCPUBar") var showCPUBar: Bool = true {
+        didSet { objectWillChange.send() }
+    }
+    @AppStorage("ShowRAMBar") var showRAMBar: Bool = true {
+        didSet { objectWillChange.send() }
+    }
+    @AppStorage("ShowBatteryBar") var showBatteryBar: Bool = true {
+        didSet { objectWillChange.send() }
+    }
+    @AppStorage("CPUBarColor") var cpuBarColorHex: String = "#34C759" {
+        didSet { objectWillChange.send() }
+    }
+    @AppStorage("RAMBarColor") var ramBarColorHex: String = "#007AFF" {
+        didSet { objectWillChange.send() }
+    }
+    @AppStorage("BatteryBarColor") var batteryBarColorHex: String = "#34C759" {
+        didSet { objectWillChange.send() }
+    }
+    
+    @Published var menuText = "\u{2191}0.0\n\u{2193}0.0"
+    @Published var cpuUsage: Double = 0.0
+    @Published var ramUsage: Double = 0.0
+    @Published var batteryLevel: Double = 1.0
+    @Published var batteryIsCharging: Bool = false
+    @Published var chargingAnimationPhase: Int = 0
     
     var currentIcon: NSImage {
-        return MenuBarIconGenerator.generateIcon(text: menuText)
+        return MenuBarIconGenerator.generateCombinedIcon(
+            text: menuText,
+            cpuUsage: cpuUsage,
+            ramUsage: ramUsage,
+            batteryLevel: batteryLevel,
+            batteryIsCharging: batteryIsCharging,
+            chargingAnimationPhase: chargingAnimationPhase,
+            showCPU: showCPUBar,
+            showRAM: showRAMBar,
+            showBattery: showBatteryBar,
+            cpuColor: NSColor(hex: cpuBarColorHex),
+            ramColor: NSColor(hex: ramBarColorHex),
+            batteryColor: NSColor(hex: batteryBarColorHex)
+        )
     }
     
     private var timer: Timer?
     private var primaryInterface: String?
     private var netTrafficStat = NetTrafficStatReceiver()
+    private var systemStatsMonitor = SystemStatsMonitor()
     
     private func currentAutoLaunchStatus() -> Bool {
         let service = SMAppService.mainApp
@@ -143,11 +183,22 @@ class MenuBarState: ObservableObject {
                             upUnit = "b"
                         }
                         
-                        // Extremely compact format to remove extra spaces and format to 2 decimal places:
-                        self.menuText = "↑\(String(format: "%.2f", displayUpload))\(upUnit)\n↓\(String(format: "%.2f", displayDownload))\(downUnit)"
+                        self.menuText = "↑\(String(format: "%.1f", displayUpload))\n↓\(String(format: "%.1f", displayDownload))"
                         
                         logger.info("SpeedIn: \(displayDownload) \(downUnit), SpeedOut: \(displayUpload) \(upUnit)")
                     }
+                }
+                
+                // Update CPU & RAM stats
+                self.cpuUsage = self.systemStatsMonitor.getCPUUsage()
+                self.ramUsage = self.systemStatsMonitor.getRAMUsage()
+                
+                // Update Battery stats
+                let batteryInfo = self.systemStatsMonitor.getBatteryInfo()
+                self.batteryLevel = batteryInfo.level
+                self.batteryIsCharging = batteryInfo.isCharging
+                if batteryInfo.isCharging {
+                    self.chargingAnimationPhase += 1
                 }
             }
         RunLoop.current.add(timer, forMode: .common)
