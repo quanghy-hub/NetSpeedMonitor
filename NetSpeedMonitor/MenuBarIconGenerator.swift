@@ -2,7 +2,7 @@ import AppKit
 
 final class MenuBarIconGenerator {
     
-    // MARK: - Original Text Icon
+    // MARK: - Original Text Icon (Template)
     
     static func generateIcon(
         text: String,
@@ -46,7 +46,8 @@ final class MenuBarIconGenerator {
         in context: CGContext,
         rect: CGRect,
         percentage: Double,
-        fillColor: NSColor
+        fillColor: NSColor,
+        borderColor: NSColor
     ) {
         let barWidth: CGFloat = 10
         let barHeight: CGFloat = 20
@@ -59,8 +60,8 @@ final class MenuBarIconGenerator {
         let barRect = CGRect(x: barX, y: barY, width: barWidth, height: barHeight)
         let barPath = NSBezierPath(roundedRect: barRect, xRadius: cornerRadius, yRadius: cornerRadius)
         
-        // Draw border/outline
-        NSColor.labelColor.withAlphaComponent(0.5).setStroke()
+        // Draw border/outline with adaptive color
+        borderColor.withAlphaComponent(0.85).setStroke()
         barPath.lineWidth = 1.0
         barPath.stroke()
         
@@ -100,7 +101,8 @@ final class MenuBarIconGenerator {
         percentage: Double,
         isCharging: Bool,
         animationPhase: Int,
-        fillColor: NSColor
+        fillColor: NSColor,
+        borderColor: NSColor
     ) {
         let barWidth: CGFloat = 10
         let barHeight: CGFloat = 20
@@ -112,8 +114,8 @@ final class MenuBarIconGenerator {
         let barRect = CGRect(x: barX, y: barY, width: barWidth, height: barHeight)
         let barPath = NSBezierPath(roundedRect: barRect, xRadius: cornerRadius, yRadius: cornerRadius)
         
-        // Border
-        NSColor.labelColor.withAlphaComponent(0.5).setStroke()
+        // Border with adaptive color
+        borderColor.withAlphaComponent(0.85).setStroke()
         barPath.lineWidth = 1.0
         barPath.stroke()
         
@@ -139,28 +141,29 @@ final class MenuBarIconGenerator {
                 displayColor = fillColor
             }
             
-            // Charging: pulsing glow effect
-            if isCharging {
-                let pulse = CGFloat(0.5 + 0.5 * sin(Double(animationPhase) * 0.5))
-                displayColor.withAlphaComponent(0.4 + 0.6 * pulse).setFill()
-            } else {
-                displayColor.setFill()
-            }
+            displayColor.setFill()
             fillPath.fill()
         }
         
-        // Charging: draw ⚡ lightning bolt
+        // Charging: draw lightning bolt (filled, no border, centered)
         if isCharging {
-            let boltFont = NSFont.systemFont(ofSize: 8, weight: .bold)
-            let boltAttributes: [NSAttributedString.Key: Any] = [
-                .font: boltFont,
-                .foregroundColor: NSColor.white
-            ]
-            let bolt = "⚡"
-            let boltSize = bolt.size(withAttributes: boltAttributes)
-            let boltX = barX + (barWidth - boltSize.width) / 2
-            let boltY = barY + (barHeight - boltSize.height) / 2
-            bolt.draw(at: CGPoint(x: boltX, y: boltY), withAttributes: boltAttributes)
+            let boltWidth: CGFloat = 6.0
+            let boltHeight: CGFloat = 12.0
+            let boltX = barX + (barWidth - boltWidth) / 2
+            let boltY = barY + (barHeight - boltHeight) / 2
+            
+            let bolt = NSBezierPath()
+            // Draw lightning bolt shape (top-right to bottom-left zigzag)
+            bolt.move(to: CGPoint(x: boltX + boltWidth * 0.55, y: boltY + boltHeight))        // top
+            bolt.line(to: CGPoint(x: boltX + boltWidth * 0.15, y: boltY + boltHeight * 0.55)) // mid-left
+            bolt.line(to: CGPoint(x: boltX + boltWidth * 0.45, y: boltY + boltHeight * 0.55)) // mid-center
+            bolt.line(to: CGPoint(x: boltX + boltWidth * 0.35, y: boltY))                     // bottom
+            bolt.line(to: CGPoint(x: boltX + boltWidth * 0.85, y: boltY + boltHeight * 0.45)) // mid-right
+            bolt.line(to: CGPoint(x: boltX + boltWidth * 0.55, y: boltY + boltHeight * 0.45)) // mid-center
+            bolt.close()
+            
+            NSColor.white.setFill()
+            bolt.fill()
         }
     }
     
@@ -197,14 +200,13 @@ final class MenuBarIconGenerator {
         if showBattery { barCount += 1 }
         let barsWidth = CGFloat(barCount) * barSlotWidth + CGFloat(max(barCount - 1, 0)) * spacing
         
-        // Calculate text width
+        // Calculate text size
         let style = NSMutableParagraphStyle()
         style.alignment = .center
-        let textAttributes: [NSAttributedString.Key: Any] = [
+        let textSize = text.size(withAttributes: [
             .font: font,
             .paragraphStyle: style
-        ]
-        let textSize = text.size(withAttributes: textAttributes)
+        ])
         let textPadding: CGFloat = 4
         let textWidth = max(textSize.width + textPadding, 20)
         
@@ -212,7 +214,15 @@ final class MenuBarIconGenerator {
         let gapBetween: CGFloat = 2
         let totalWidth = barsWidth + gapBetween + textWidth
         
+        // Generate a single non-template image, but inside the draw handler we read the current appearance context!
         let image = NSImage(size: NSSize(width: totalWidth, height: menuBarHeight), flipped: false) { rect in
+            // Get the current drawing appearance context set by the system (menu bar)
+            let menuBarAppearance = NSAppearance.currentDrawing()
+            let isDark = menuBarAppearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
+            
+            // Set foregroundColor to high contrast white (on dark background) or black (on light background)
+            let foregroundColor = isDark ? NSColor.white : NSColor.black
+            
             // Draw bars on the left
             var xOffset: CGFloat = 0
             
@@ -223,7 +233,8 @@ final class MenuBarIconGenerator {
                     in: NSGraphicsContext.current!.cgContext,
                     rect: cpuRect,
                     percentage: cpuUsage,
-                    fillColor: cpuColor
+                    fillColor: cpuColor,
+                    borderColor: foregroundColor
                 )
                 NSGraphicsContext.current?.cgContext.restoreGState()
                 xOffset += barSlotWidth + spacing
@@ -236,7 +247,8 @@ final class MenuBarIconGenerator {
                     in: NSGraphicsContext.current!.cgContext,
                     rect: ramRect,
                     percentage: ramUsage,
-                    fillColor: ramColor
+                    fillColor: ramColor,
+                    borderColor: foregroundColor
                 )
                 NSGraphicsContext.current?.cgContext.restoreGState()
                 xOffset += barSlotWidth + spacing
@@ -251,7 +263,8 @@ final class MenuBarIconGenerator {
                     percentage: batteryLevel,
                     isCharging: batteryIsCharging,
                     animationPhase: chargingAnimationPhase,
-                    fillColor: batteryColor
+                    fillColor: batteryColor,
+                    borderColor: foregroundColor
                 )
                 NSGraphicsContext.current?.cgContext.restoreGState()
                 xOffset += barSlotWidth
@@ -266,14 +279,19 @@ final class MenuBarIconGenerator {
                 width: textSize.width,
                 height: textSize.height
             )
+            
+            let textAttributes: [NSAttributedString.Key: Any] = [
+                .font: font,
+                .paragraphStyle: style,
+                .foregroundColor: foregroundColor
+            ]
             text.draw(in: textRect, withAttributes: textAttributes)
             
             return true
         }
         
-        // Don't set as template so colors are preserved
+        // Don't set as template so colors of the fills are preserved
         image.isTemplate = false
         return image
     }
 }
-

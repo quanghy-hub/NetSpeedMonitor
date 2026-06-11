@@ -64,7 +64,7 @@ class MenuBarState: ObservableObject {
         didSet { objectWillChange.send() }
     }
     
-    @Published var menuText = "\u{2191}0.0\n\u{2193}0.0"
+    @Published var menuText = "0.0\n0.0"
     @Published var cpuUsage: Double = 0.0
     @Published var ramUsage: Double = 0.0
     @Published var batteryLevel: Double = 1.0
@@ -183,7 +183,7 @@ class MenuBarState: ObservableObject {
                             upUnit = "b"
                         }
                         
-                        self.menuText = "↑\(String(format: "%.1f", displayUpload))\n↓\(String(format: "%.1f", displayDownload))"
+                        self.menuText = "\(String(format: "%.1f", displayUpload))\n\(String(format: "%.1f", displayDownload))"
                         
                         logger.info("SpeedIn: \(displayDownload) \(downUnit), SpeedOut: \(displayUpload) \(upUnit)")
                     }
