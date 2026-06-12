@@ -37,31 +37,31 @@ class MenuBarState: ObservableObject {
     @AppStorage("AutoLaunchEnabled") var autoLaunchEnabled: Bool = false {
         didSet { updateAutoLaunchStatus() }
     }
-    @AppStorage("NetSpeedUpdateInterval") var netSpeedUpdateInterval: NetSpeedUpdateInterval = .Sec1 {
+    @AppStorage("NetSpeedUpdateInterval") var netSpeedUpdateInterval: NetSpeedUpdateInterval = .Sec2 {
         didSet { updateNetSpeedUpdateIntervalStatus() }
     }
     @AppStorage("SpeedUnitSelection") var speedUnit: SpeedUnit = .auto {
-        didSet { updateNetSpeedUpdateIntervalStatus() }
+        didSet { refreshIcon(force: true) }
     }
     
     // System Monitor Settings
     @AppStorage("ShowCPUBar") var showCPUBar: Bool = true {
-        didSet { objectWillChange.send() }
+        didSet { refreshIcon(force: true) }
     }
     @AppStorage("ShowRAMBar") var showRAMBar: Bool = true {
-        didSet { objectWillChange.send() }
+        didSet { refreshIcon(force: true) }
     }
     @AppStorage("ShowBatteryBar") var showBatteryBar: Bool = true {
-        didSet { objectWillChange.send() }
+        didSet { refreshIcon(force: true) }
     }
     @AppStorage("CPUBarColor") var cpuBarColorHex: String = "#34C759" {
-        didSet { objectWillChange.send() }
+        didSet { refreshIcon(force: true) }
     }
     @AppStorage("RAMBarColor") var ramBarColorHex: String = "#007AFF" {
-        didSet { objectWillChange.send() }
+        didSet { refreshIcon(force: true) }
     }
     @AppStorage("BatteryBarColor") var batteryBarColorHex: String = "#34C759" {
-        didSet { objectWillChange.send() }
+        didSet { refreshIcon(force: true) }
     }
     
     @Published var menuText = "0.0\n0.0"
@@ -70,26 +70,25 @@ class MenuBarState: ObservableObject {
     @Published var batteryLevel: Double = 1.0
     @Published var batteryIsCharging: Bool = false
     @Published var chargingAnimationPhase: Int = 0
-    
-    var currentIcon: NSImage {
-        return MenuBarIconGenerator.generateCombinedIcon(
-            text: menuText,
-            cpuUsage: cpuUsage,
-            ramUsage: ramUsage,
-            batteryLevel: batteryLevel,
-            batteryIsCharging: batteryIsCharging,
-            chargingAnimationPhase: chargingAnimationPhase,
-            showCPU: showCPUBar,
-            showRAM: showRAMBar,
-            showBattery: showBatteryBar,
-            cpuColor: NSColor(hex: cpuBarColorHex),
-            ramColor: NSColor(hex: ramBarColorHex),
-            batteryColor: NSColor(hex: batteryBarColorHex)
-        )
-    }
+    @Published var currentIcon: NSImage = MenuBarIconGenerator.generateCombinedIcon(
+        text: "0.0\n0.0",
+        cpuUsage: 0.0,
+        ramUsage: 0.0,
+        batteryLevel: 1.0,
+        batteryIsCharging: false,
+        chargingAnimationPhase: 0,
+        showCPU: true,
+        showRAM: true,
+        showBattery: true,
+        cpuColor: NSColor(hex: "#34C759"),
+        ramColor: NSColor(hex: "#007AFF"),
+        batteryColor: NSColor(hex: "#34C759")
+    )
     
     private var timer: Timer?
     private var primaryInterface: String?
+    private var primaryInterfaceLastCheckedAt = Date.distantPast
+    private var lastIconSignature = ""
     private var netTrafficStat = NetTrafficStatReceiver()
     private var systemStatsMonitor = SystemStatsMonitor()
     
@@ -131,61 +130,88 @@ class MenuBarState: ObservableObject {
         let primaryInterface = global?.value(forKey: "PrimaryInterface") as? String
         return primaryInterface
     }
+
+    private func refreshPrimaryInterfaceIfNeeded() {
+        let now = Date()
+        if primaryInterface == nil || now.timeIntervalSince(primaryInterfaceLastCheckedAt) >= 10.0 {
+            primaryInterface = findPrimaryInterface()
+            primaryInterfaceLastCheckedAt = now
+        }
+    }
+
+    private func formattedSpeeds(upload: Double, download: Double) -> String {
+        var displayDownload = download
+        var displayUpload = upload
+
+        switch speedUnit {
+        case .auto:
+            while displayDownload > 1000.0 {
+                displayDownload /= 1024.0
+            }
+            while displayUpload > 1000.0 {
+                displayUpload /= 1024.0
+            }
+        case .kb:
+            displayDownload /= 1024.0
+            displayUpload /= 1024.0
+        case .mb:
+            displayDownload /= (1024.0 * 1024.0)
+            displayUpload /= (1024.0 * 1024.0)
+        case .bytes:
+            break
+        case .bits:
+            displayDownload *= 8.0
+            displayUpload *= 8.0
+        }
+
+        return "\(String(format: "%.1f", displayUpload))\n\(String(format: "%.1f", displayDownload))"
+    }
+
+    private func refreshIcon(force: Bool = false) {
+        let signature = [
+            menuText,
+            String(Int(cpuUsage * 100)),
+            String(Int(ramUsage * 100)),
+            String(Int(batteryLevel * 100)),
+            String(batteryIsCharging),
+            String(chargingAnimationPhase % 2),
+            String(showCPUBar),
+            String(showRAMBar),
+            String(showBatteryBar),
+            cpuBarColorHex,
+            ramBarColorHex,
+            batteryBarColorHex
+        ].joined(separator: "|")
+
+        guard force || signature != lastIconSignature else { return }
+        lastIconSignature = signature
+        currentIcon = MenuBarIconGenerator.generateCombinedIcon(
+            text: menuText,
+            cpuUsage: cpuUsage,
+            ramUsage: ramUsage,
+            batteryLevel: batteryLevel,
+            batteryIsCharging: batteryIsCharging,
+            chargingAnimationPhase: chargingAnimationPhase,
+            showCPU: showCPUBar,
+            showRAM: showRAMBar,
+            showBattery: showBatteryBar,
+            cpuColor: NSColor(hex: cpuBarColorHex),
+            ramColor: NSColor(hex: ramBarColorHex),
+            batteryColor: NSColor(hex: batteryBarColorHex)
+        )
+    }
     
     private func startTimer() {
         let timer = Timer.scheduledTimer(withTimeInterval: TimeInterval(self.netSpeedUpdateInterval.rawValue), repeats: true) { _ in
 
-                self.primaryInterface = self.findPrimaryInterface()
+                self.refreshPrimaryInterfaceIfNeeded()
                 if (self.primaryInterface == nil) { return }
                 
                 if let netTrafficStatMap = self.netTrafficStat.getNetTrafficStatMap() {
                     if let netTrafficStat = netTrafficStatMap.object(forKey: self.primaryInterface!) as? NetTrafficStat  {
                         let rawDownload = netTrafficStat.ibytes_per_sec as! Double
                         let rawUpload = netTrafficStat.obytes_per_sec as! Double
-                        
-                        var displayDownload = rawDownload
-                        var displayUpload = rawUpload
-                        var downUnit = ""
-                        var upUnit = ""
-                        
-                        switch self.speedUnit {
-                        case .auto:
-                            let metrics = ["B", "KB", "MB", "GB", "TB"]
-                            var downIdx = 0
-                            var upIdx = 0
-                            while displayDownload > 1000.0 && downIdx < metrics.count - 1 {
-                                displayDownload /= 1024.0
-                                downIdx += 1
-                            }
-                            while displayUpload > 1000.0 && upIdx < metrics.count - 1 {
-                                displayUpload /= 1024.0
-                                upIdx += 1
-                            }
-                            downUnit = metrics[downIdx]
-                            upUnit = metrics[upIdx]
-                        case .kb:
-                            displayDownload /= 1024.0
-                            displayUpload /= 1024.0
-                            downUnit = "KB"
-                            upUnit = "KB"
-                        case .mb:
-                            displayDownload /= (1024.0 * 1024.0)
-                            displayUpload /= (1024.0 * 1024.0)
-                            downUnit = "MB"
-                            upUnit = "MB"
-                        case .bytes:
-                            downUnit = "B"
-                            upUnit = "B"
-                        case .bits:
-                            displayDownload *= 8.0
-                            displayUpload *= 8.0
-                            downUnit = "b"
-                            upUnit = "b"
-                        }
-                        
-                        self.menuText = "\(String(format: "%.1f", displayUpload))\n\(String(format: "%.1f", displayDownload))"
-                        
-                        logger.info("SpeedIn: \(displayDownload) \(downUnit), SpeedOut: \(displayUpload) \(upUnit)")
+                        self.menuText = self.formattedSpeeds(upload: rawUpload, download: rawDownload)
                     }
                 }
                 
@@ -200,6 +226,8 @@ class MenuBarState: ObservableObject {
                 if batteryInfo.isCharging {
                     self.chargingAnimationPhase += 1
                 }
+
+                self.refreshIcon()
             }
         RunLoop.current.add(timer, forMode: .common)
         self.timer = timer
@@ -225,4 +253,3 @@ class MenuBarState: ObservableObject {
         }
     }
 }
-
