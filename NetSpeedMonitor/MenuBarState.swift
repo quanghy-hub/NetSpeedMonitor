@@ -1,41 +1,12 @@
 import SwiftUI
 import Combine
-import ServiceManagement
 import SystemConfiguration
-
-enum NetSpeedUpdateInterval: Int, CaseIterable, Identifiable {
-    case Sec1 = 1
-    case Sec2 = 2
-    case Sec5 = 5
-    case Sec10 = 10
-    case Sec30 = 30
-    
-    var id: Int { self.rawValue }
-    
-    var displayName: String {
-        switch self {
-        case .Sec1: return "1s"
-        case .Sec2: return "2s"
-        case .Sec5: return "5s"
-        case .Sec10: return "10s"
-        case .Sec30: return "30s"
-        }
-    }
-}
-
-enum SpeedUnit: String, CaseIterable, Identifiable {
-    case auto = "Auto"
-    case kb = "KB/s"
-    case mb = "MB/s"
-    case bytes = "B/s"
-    case bits = "bps"
-    
-    var id: String { self.rawValue }
-}
 
 class MenuBarState: ObservableObject {
     @AppStorage("AutoLaunchEnabled") var autoLaunchEnabled: Bool = false {
-        didSet { updateAutoLaunchStatus() }
+        didSet {
+            AutoLaunchManager.shared.isEnabled = autoLaunchEnabled
+        }
     }
     @AppStorage("NetSpeedUpdateInterval") var netSpeedUpdateInterval: NetSpeedUpdateInterval = .Sec2 {
         didSet { updateNetSpeedUpdateIntervalStatus() }
@@ -86,37 +57,9 @@ class MenuBarState: ObservableObject {
     )
     
     private var timer: Timer?
-    private var primaryInterface: String?
-    private var primaryInterfaceLastCheckedAt = Date.distantPast
     private var lastIconSignature = ""
     private var netTrafficStat = NetTrafficStatReceiver()
     private var systemStatsMonitor = SystemStatsMonitor()
-    
-    private func currentAutoLaunchStatus() -> Bool {
-        let service = SMAppService.mainApp
-        let status = service.status
-        return status == .enabled
-    }
-    
-    private func updateAutoLaunchStatus() {
-        let service = SMAppService.mainApp
-        
-        do {
-            if autoLaunchEnabled {
-                if service.status == .notFound || service.status == .notRegistered {
-                    try service.register()
-                }
-            } else {
-                if service.status == .enabled {
-                    try service.unregister()
-                }
-            }
-            logger.info("updateAutoLaunchStatus succeeded, autoLaunchEnabled: \(String(self.autoLaunchEnabled)), service.enabled: \(String(service.status == .enabled))")
-        } catch {
-            logger.warning("updateAutoLaunchStatus failed: \(error.localizedDescription), autoLaunchEnabled: \(String(self.autoLaunchEnabled)), service.enabled: \(String(service.status == .enabled))")
-            autoLaunchEnabled = currentAutoLaunchStatus()
-        }
-    }
     
     private func updateNetSpeedUpdateIntervalStatus() {
         logger.info("netSpeedUpdateInterval, \(self.netSpeedUpdateInterval.displayName)")
@@ -124,49 +67,6 @@ class MenuBarState: ObservableObject {
         self.startTimer()
     }
     
-    private func findPrimaryInterface() -> String? {
-        let storeRef = SCDynamicStoreCreate(nil, "FindCurrentInterfaceIpMac" as CFString, nil, nil)
-        let global = SCDynamicStoreCopyValue(storeRef, "State:/Network/Global/IPv4" as CFString)
-        let primaryInterface = global?.value(forKey: "PrimaryInterface") as? String
-        return primaryInterface
-    }
-
-    private func refreshPrimaryInterfaceIfNeeded() {
-        let now = Date()
-        if primaryInterface == nil || now.timeIntervalSince(primaryInterfaceLastCheckedAt) >= 10.0 {
-            primaryInterface = findPrimaryInterface()
-            primaryInterfaceLastCheckedAt = now
-        }
-    }
-
-    private func formattedSpeeds(upload: Double, download: Double) -> String {
-        var displayDownload = download
-        var displayUpload = upload
-
-        switch speedUnit {
-        case .auto:
-            while displayDownload > 1000.0 {
-                displayDownload /= 1024.0
-            }
-            while displayUpload > 1000.0 {
-                displayUpload /= 1024.0
-            }
-        case .kb:
-            displayDownload /= 1024.0
-            displayUpload /= 1024.0
-        case .mb:
-            displayDownload /= (1024.0 * 1024.0)
-            displayUpload /= (1024.0 * 1024.0)
-        case .bytes:
-            break
-        case .bits:
-            displayDownload *= 8.0
-            displayUpload *= 8.0
-        }
-
-        return "\(String(format: "%.1f", displayUpload))\n\(String(format: "%.1f", displayDownload))"
-    }
-
     private func refreshIcon(force: Bool = false) {
         let signature = [
             menuText,
@@ -182,7 +82,7 @@ class MenuBarState: ObservableObject {
             ramBarColorHex,
             batteryBarColorHex
         ].joined(separator: "|")
-
+        
         guard force || signature != lastIconSignature else { return }
         lastIconSignature = signature
         currentIcon = MenuBarIconGenerator.generateCombinedIcon(
@@ -203,32 +103,31 @@ class MenuBarState: ObservableObject {
     
     private func startTimer() {
         let timer = Timer.scheduledTimer(withTimeInterval: TimeInterval(self.netSpeedUpdateInterval.rawValue), repeats: true) { _ in
-
-                self.refreshPrimaryInterfaceIfNeeded()
-                if (self.primaryInterface == nil) { return }
-                
-                if let netTrafficStatMap = self.netTrafficStat.getNetTrafficStatMap() {
-                    if let netTrafficStat = netTrafficStatMap.object(forKey: self.primaryInterface!) as? NetTrafficStat  {
-                        let rawDownload = netTrafficStat.ibytes_per_sec as! Double
-                        let rawUpload = netTrafficStat.obytes_per_sec as! Double
-                        self.menuText = self.formattedSpeeds(upload: rawUpload, download: rawDownload)
-                    }
+            
+            guard let primaryInterface = NetworkInterfaceManager.shared.getPrimaryInterface() else { return }
+            
+            if let netTrafficStatMap = self.netTrafficStat.getNetTrafficStatMap() {
+                if let netTrafficStat = netTrafficStatMap.object(forKey: primaryInterface) as? NetTrafficStat  {
+                    let rawDownload = netTrafficStat.ibytes_per_sec as! Double
+                    let rawUpload = netTrafficStat.obytes_per_sec as! Double
+                    self.menuText = SpeedFormatter.format(upload: rawUpload, download: rawDownload, unit: self.speedUnit)
                 }
-                
-                // Update CPU & RAM stats
-                self.cpuUsage = self.systemStatsMonitor.getCPUUsage()
-                self.ramUsage = self.systemStatsMonitor.getRAMUsage()
-                
-                // Update Battery stats
-                let batteryInfo = self.systemStatsMonitor.getBatteryInfo()
-                self.batteryLevel = batteryInfo.level
-                self.batteryIsCharging = batteryInfo.isCharging
-                if batteryInfo.isCharging {
-                    self.chargingAnimationPhase += 1
-                }
-
-                self.refreshIcon()
             }
+            
+            // Update CPU & RAM stats
+            self.cpuUsage = self.systemStatsMonitor.getCPUUsage()
+            self.ramUsage = self.systemStatsMonitor.getRAMUsage()
+            
+            // Update Battery stats
+            let batteryInfo = self.systemStatsMonitor.getBatteryInfo()
+            self.batteryLevel = batteryInfo.level
+            self.batteryIsCharging = batteryInfo.isCharging
+            if batteryInfo.isCharging {
+                self.chargingAnimationPhase += 1
+            }
+            
+            self.refreshIcon()
+        }
         RunLoop.current.add(timer, forMode: .common)
         self.timer = timer
         logger.info("startTimer")
@@ -242,7 +141,7 @@ class MenuBarState: ObservableObject {
     
     init() {
         DispatchQueue.main.async {
-            self.autoLaunchEnabled = self.currentAutoLaunchStatus()
+            self.autoLaunchEnabled = AutoLaunchManager.shared.isEnabled
             self.startTimer()
         }
     }

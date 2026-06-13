@@ -24,13 +24,8 @@ echo "=== Building NetSpeedMonitor ==="
 echo "Compiling Swift files..."
 mkdir -p "$DIST_DIR"
 swiftc -o "$DIST_DIR/NetSpeedMonitor_bin" \
-  NetSpeedMonitor/ColorExtension.swift \
-  NetSpeedMonitor/SystemStatsMonitor.swift \
-  NetSpeedMonitor/MenuBarIconGenerator.swift \
-  NetSpeedMonitor/MenuBarState.swift \
-  NetSpeedMonitor/MenuContentView.swift \
-  NetSpeedMonitor/NetSpeedMonitorApp.swift \
-  NetSpeedMonitor/NetTrafficStat.swift
+  $(find NetSpeedMonitor -name "*.swift")
+
 
 # 2. Package into .app bundle
 echo "Structuring $APP_NAME.app..."

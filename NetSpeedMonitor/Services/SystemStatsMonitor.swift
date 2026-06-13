@@ -112,12 +112,6 @@ final class SystemStatsMonitor {
     
     // MARK: - Battery Info
     
-    struct BatteryInfo {
-        let level: Double      // 0.0 - 1.0
-        let isCharging: Bool
-        let isPluggedIn: Bool
-    }
-    
     func getBatteryInfo() -> BatteryInfo {
         let snapshot = IOPSCopyPowerSourcesInfo().takeRetainedValue()
         let sources = IOPSCopyPowerSourcesList(snapshot).takeRetainedValue() as Array
@@ -149,4 +143,3 @@ final class SystemStatsMonitor {
         }
     }
 }
-
