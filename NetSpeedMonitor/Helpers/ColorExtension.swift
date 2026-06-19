@@ -7,7 +7,7 @@ extension Color {
         let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
         var int: UInt64 = 0
         Scanner(string: hex).scanHexInt64(&int)
-        
+
         let r, g, b, a: UInt64
         switch hex.count {
         case 6: // RGB
@@ -17,7 +17,7 @@ extension Color {
         default:
             (r, g, b, a) = (128, 128, 128, 255)
         }
-        
+
         self.init(
             .sRGB,
             red: Double(r) / 255.0,
@@ -34,7 +34,7 @@ extension NSColor {
         let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
         var int: UInt64 = 0
         Scanner(string: hex).scanHexInt64(&int)
-        
+
         let r, g, b, a: UInt64
         switch hex.count {
         case 6: // RGB
@@ -44,7 +44,7 @@ extension NSColor {
         default:
             (r, g, b, a) = (128, 128, 128, 255)
         }
-        
+
         self.init(
             srgbRed: CGFloat(r) / 255.0,
             green: CGFloat(g) / 255.0,
@@ -52,13 +52,17 @@ extension NSColor {
             alpha: CGFloat(a) / 255.0
         )
     }
-    
+
     /// Convert NSColor to hex string
     func toHex() -> String {
         guard let color = usingColorSpace(.sRGB) else { return "#808080" }
-        let r = Int(round(color.redComponent * 255))
-        let g = Int(round(color.greenComponent * 255))
-        let b = Int(round(color.blueComponent * 255))
+        let r = Self.hexComponent(color.redComponent)
+        let g = Self.hexComponent(color.greenComponent)
+        let b = Self.hexComponent(color.blueComponent)
         return String(format: "#%02X%02X%02X", r, g, b)
+    }
+
+    private static func hexComponent(_ value: CGFloat) -> Int {
+        Int(round(min(max(value, 0), 1) * 255))
     }
 }

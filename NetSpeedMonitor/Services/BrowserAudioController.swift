@@ -1,0 +1,97 @@
+import AppKit
+import Foundation
+
+final class BrowserAudioController {
+    private let scriptRunner: AppleScriptRunning
+    
+    init(scriptRunner: AppleScriptRunning = OsaScriptRunner()) {
+        self.scriptRunner = scriptRunner
+    }
+    
+    func audibleTabs(matching audibleProcessIDs: Set<pid_t>) -> [BrowserAudioTab] {
+        safariTabs(matching: audibleProcessIDs) + chromeTabs(matching: audibleProcessIDs)
+    }
+    
+    func setVolume(_ volume: Double, for tab: BrowserAudioTab) -> Bool {
+        switch tab.browserName {
+        case "Safari":
+            return setSafariVolume(volume, windowIndex: tab.windowIndex, tabIndex: tab.tabIndex)
+        case "Google Chrome":
+            return setChromeVolume(volume, windowIndex: tab.windowIndex, tabIndex: tab.tabIndex)
+        default:
+            return false
+        }
+    }
+    
+    private func safariTabs(matching audibleProcessIDs: Set<pid_t>) -> [BrowserAudioTab] {
+        guard isRunning(bundleID: "com.apple.Safari") else { return [] }
+        return tabs(from: run(script: BrowserAudioScripts.safariScanScript()), browserName: "Safari")
+            .filter { tab in
+                tab.isAudible || tab.processID.map { audibleProcessIDs.contains($0) } == true
+            }
+    }
+    
+    private func chromeTabs(matching audibleProcessIDs: Set<pid_t>) -> [BrowserAudioTab] {
+        guard isRunning(bundleID: "com.google.Chrome") else { return [] }
+        return tabs(from: run(script: BrowserAudioScripts.chromeScanScript()), browserName: "Google Chrome")
+            .filter { tab in
+                tab.isAudible || tab.processID.map { audibleProcessIDs.contains($0) } == true
+            }
+    }
+    
+    private func setSafariVolume(_ volume: Double, windowIndex: Int, tabIndex: Int) -> Bool {
+        run(script: """
+        tell application "Safari"
+            do JavaScript "\(BrowserAudioScripts.setMediaVolumeJavaScript(volume: volume))" in tab \(tabIndex) of window \(windowIndex)
+        end tell
+        """) != nil
+    }
+    
+    private func setChromeVolume(_ volume: Double, windowIndex: Int, tabIndex: Int) -> Bool {
+        run(script: """
+        tell application "Google Chrome"
+            execute javascript "\(BrowserAudioScripts.setMediaVolumeJavaScript(volume: volume))" in tab \(tabIndex) of window \(windowIndex)
+        end tell
+        """) != nil
+    }
+    
+    private func run(script: String) -> String? {
+        do {
+            return try scriptRunner.run(script: script)
+        } catch {
+            logger.warning("Browser audio AppleScript failed: \(error.localizedDescription)")
+            return nil
+        }
+    }
+    
+    private func tabs(from output: String?, browserName: String) -> [BrowserAudioTab] {
+        output?
+            .split(separator: "\n")
+            .compactMap { BrowserAudioTab(line: String($0), browserName: browserName) } ?? []
+    }
+    
+    private func isRunning(bundleID: String) -> Bool {
+        NSWorkspace.shared.runningApplications.contains { $0.bundleIdentifier == bundleID }
+    }
+}
+
+private extension BrowserAudioTab {
+    init?(line: String, browserName: String) {
+        let fields = line.components(separatedBy: "\t")
+        guard fields.count >= 7,
+              let windowIndex = Int(fields[0]),
+              let tabIndex = Int(fields[1]),
+              let mediaCount = Int(fields[4]),
+              let audibleCount = Int(fields[5]) else { return nil }
+        
+        self.browserName = browserName
+        self.windowIndex = windowIndex
+        self.tabIndex = tabIndex
+        self.processID = Int32(fields[2])
+        self.title = fields[3].isEmpty ? "Untitled Tab" : fields[3]
+        self.mediaElementCount = mediaCount
+        self.audibleMediaElementCount = audibleCount
+        self.url = fields[6]
+        self.id = "\(browserName):\(windowIndex):\(tabIndex):\(url)"
+    }
+}

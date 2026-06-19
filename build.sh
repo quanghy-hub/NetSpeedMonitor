@@ -15,6 +15,30 @@ APP_MACOS="$APP_CONTENTS/MacOS"
 APP_RESOURCES="$APP_CONTENTS/Resources"
 APP_BINARY="$APP_MACOS/$APP_NAME"
 INFO_PLIST="$APP_CONTENTS/Info.plist"
+DEFAULT_CODESIGN_IDENTITY="TranslatZ Local Code Signing"
+CODESIGN_IDENTITY="${NETSPEED_CODESIGN_IDENTITY:-$DEFAULT_CODESIGN_IDENTITY}"
+
+migrate_music_blocker_preferences() {
+  local legacy_preferences="$HOME/Library/Preferences/$BUNDLE_ID.plist"
+  local enabled replacement
+
+  [[ -f "$legacy_preferences" ]] || return
+
+  if ! defaults read "$BUNDLE_ID" XMusicEnabled >/dev/null 2>&1; then
+    enabled="$(plutil -extract XMusicEnabled raw -o - "$legacy_preferences" 2>/dev/null || true)"
+    case "$enabled" in
+      true|1) defaults write "$BUNDLE_ID" XMusicEnabled -bool true ;;
+      false|0) defaults write "$BUNDLE_ID" XMusicEnabled -bool false ;;
+    esac
+  fi
+
+  if ! defaults read "$BUNDLE_ID" XMusicReplacement >/dev/null 2>&1; then
+    replacement="$(plutil -extract XMusicReplacement raw -o - "$legacy_preferences" 2>/dev/null || true)"
+    if [[ -n "$replacement" ]]; then
+      defaults write "$BUNDLE_ID" XMusicReplacement -string "$replacement"
+    fi
+  fi
+}
 
 cd "$ROOT_DIR"
 
@@ -79,23 +103,35 @@ cat >"$INFO_PLIST" <<PLIST
   <string>$MIN_SYSTEM_VERSION</string>
   <key>NSPrincipalClass</key>
   <string>NSApplication</string>
+  <key>NSAudioCaptureUsageDescription</key>
+  <string>NetSpeedMonitor captures app audio locally only to adjust per-app volume. Audio is not recorded or sent anywhere.</string>
   <key>LSUIElement</key>
   <true/>
 </dict>
 </plist>
 PLIST
 
-# 4. Codesign (Ad-hoc)
+# 4. Codesign
 echo "Signing the App Bundle..."
-if [ -f "NetSpeedMonitor/NetSpeedMonitor.entitlements" ]; then
-  /usr/bin/codesign --force --sign - --entitlements NetSpeedMonitor/NetSpeedMonitor.entitlements "$APP_BUNDLE"
+if security find-identity -v -p codesigning | grep -Fq "\"$CODESIGN_IDENTITY\""; then
+  SIGN_VALUE="$CODESIGN_IDENTITY"
+  echo "Using signing identity: $CODESIGN_IDENTITY"
 else
-  /usr/bin/codesign --force --sign - "$APP_BUNDLE"
+  SIGN_VALUE="-"
+  echo "Signing identity not found, falling back to ad-hoc signing."
+fi
+
+if [ -f "NetSpeedMonitor/NetSpeedMonitor.entitlements" ]; then
+  /usr/bin/codesign --force --sign "$SIGN_VALUE" --entitlements NetSpeedMonitor/NetSpeedMonitor.entitlements "$APP_BUNDLE"
+else
+  /usr/bin/codesign --force --sign "$SIGN_VALUE" "$APP_BUNDLE"
 fi
 
 echo "=== Build Successful! ==="
 echo "App is saved at: $APP_BUNDLE"
 echo "Launching app..."
+
+migrate_music_blocker_preferences
 
 # Kill running instance if any
 pkill -x "$APP_NAME" || true

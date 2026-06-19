@@ -20,6 +20,8 @@
   <string>14.0</string>
   <key>NSPrincipalClass</key>
   <string>NSApplication</string>
+  <key>NSAudioCaptureUsageDescription</key>
+  <string>NetSpeedMonitor captures app audio locally only to adjust per-app volume. Audio is not recorded or sent anywhere.</string>
   <key>LSUIElement</key>
   <true/>
 </dict>
