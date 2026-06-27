@@ -18,9 +18,6 @@ final class ColorSwatchControl: NSControl {
         let circle = NSBezierPath(ovalIn: bounds.insetBy(dx: 1, dy: 1))
         color.withAlphaComponent(isEnabled ? 1 : 0.4).setFill()
         circle.fill()
-        NSColor.separatorColor.withAlphaComponent(0.9).setStroke()
-        circle.lineWidth = 1
-        circle.stroke()
     }
 
     override func mouseDown(with event: NSEvent) {

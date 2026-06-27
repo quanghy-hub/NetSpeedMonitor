@@ -161,13 +161,7 @@ final class MenuBarState: ObservableObject {
 
             guard let primaryInterface = NetworkInterfaceManager.shared.getPrimaryInterface() else { return }
 
-            if let netTrafficStatMap = self.netTrafficStat.getNetTrafficStatMap() {
-                if let netTrafficStat = netTrafficStatMap.object(forKey: primaryInterface) as? NetTrafficStat  {
-                    let rawDownload = netTrafficStat.ibytes_per_sec as! Double
-                    let rawUpload = netTrafficStat.obytes_per_sec as! Double
-                    self.menuText = SpeedFormatter.format(upload: rawUpload, download: rawDownload, unit: self.speedUnit)
-                }
-            }
+            self.updateNetworkSpeedText(for: primaryInterface)
 
             // Update CPU & RAM stats
             self.cpuUsage = self.systemStatsMonitor.getCPUUsage()
@@ -189,6 +183,16 @@ final class MenuBarState: ObservableObject {
         self.timer?.invalidate()
         self.timer = nil
         logger.info("stopTimer")
+    }
+
+    private func updateNetworkSpeedText(for primaryInterface: String) {
+        guard let netTrafficStatMap = netTrafficStat.getNetTrafficStatMap(),
+              let netTrafficStat = netTrafficStatMap.object(forKey: primaryInterface) as? NetTrafficStat else {
+            return
+        }
+        let rawUpload = netTrafficStat.obytes_per_sec.doubleValue
+        let rawDownload = netTrafficStat.ibytes_per_sec.doubleValue
+        menuText = SpeedFormatter.format(upload: rawUpload, download: rawDownload, unit: speedUnit)
     }
 
     func refreshAudioMixer() {
