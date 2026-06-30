@@ -15,7 +15,6 @@ final class MenuBarState: ObservableObject {
         didSet { refreshIcon(force: true) }
     }
 
-    // System Monitor Settings
     @AppStorage("ShowCPUBar") var showCPUBar: Bool = true {
         didSet { refreshIcon(force: true) }
     }
@@ -56,7 +55,6 @@ final class MenuBarState: ObservableObject {
         ColorArchive.resolve(batteryBarColorArchive, fallbackHex: batteryBarColorHex)
     }
 
-    // Music Blocker Settings
     @AppStorage("XMusicEnabled") var xmusicEnabled: Bool = false {
         didSet {
             let newValue = xmusicEnabled
@@ -157,17 +155,15 @@ final class MenuBarState: ObservableObject {
     }
 
     private func startTimer() {
-        let timer = Timer.scheduledTimer(withTimeInterval: TimeInterval(self.netSpeedUpdateInterval.rawValue), repeats: true) { _ in
+        let timer = Timer.scheduledTimer(withTimeInterval: TimeInterval(self.netSpeedUpdateInterval.rawValue), repeats: true) { [weak self] _ in
+            guard let self else { return }
 
             guard let primaryInterface = NetworkInterfaceManager.shared.getPrimaryInterface() else { return }
 
             self.updateNetworkSpeedText(for: primaryInterface)
-
-            // Update CPU & RAM stats
             self.cpuUsage = self.systemStatsMonitor.getCPUUsage()
             self.ramUsage = self.systemStatsMonitor.getRAMUsage()
 
-            // Update Battery stats
             let batteryInfo = self.systemStatsMonitor.getBatteryInfo()
             self.batteryLevel = batteryInfo.level
             self.batteryIsCharging = batteryInfo.isCharging
@@ -200,7 +196,8 @@ final class MenuBarState: ObservableObject {
         isAudioMixerRefreshing = true
         audioMixerStatus = "Scanning audio..."
 
-        DispatchQueue.global(qos: .userInitiated).async {
+        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+            guard let self else { return }
             let items = self.audioSessionCatalog.loadItems()
             DispatchQueue.main.async {
                 self.audioMixerItems = items
@@ -289,9 +286,11 @@ final class MenuBarState: ObservableObject {
     }
 
     deinit {
-        DispatchQueue.main.async {
-            self.stopTimer()
-            self.audioSessionCatalog.stop()
+        timer?.invalidate()
+        pendingRefreshWorkItem?.cancel()
+        for workItem in audioCommitWorkItems.values {
+            workItem.cancel()
         }
+        audioSessionCatalog.stop()
     }
 }

@@ -10,8 +10,11 @@ cd "$ROOT_DIR"
 swiftc \
   NetSpeedMonitor/Models/ColorArchive.swift \
   NetSpeedMonitor/Models/MusicReplacement.swift \
+  NetSpeedMonitor/Models/SpeedUnit.swift \
+  NetSpeedMonitor/Services/BrowserAudioScripts.swift \
   NetSpeedMonitor/Helpers/ColorExtension.swift \
+  NetSpeedMonitor/Helpers/SpeedFormatter.swift \
   NetSpeedMonitor/Services/MediaPlayKeyMonitor.swift \
-  Tests/MusicReplacementTests.swift \
+  Tests/*.swift \
   -o "$TEST_BINARY"
 "$TEST_BINARY"

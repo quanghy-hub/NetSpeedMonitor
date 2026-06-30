@@ -15,8 +15,39 @@ APP_MACOS="$APP_CONTENTS/MacOS"
 APP_RESOURCES="$APP_CONTENTS/Resources"
 APP_BINARY="$APP_MACOS/$APP_NAME"
 INFO_PLIST="$APP_CONTENTS/Info.plist"
-DEFAULT_CODESIGN_IDENTITY="TranslatZ Local Code Signing"
+DEFAULT_CODESIGN_IDENTITY="NetSpeedMonitor Local Code Signing"
 CODESIGN_IDENTITY="${NETSPEED_CODESIGN_IDENTITY:-$DEFAULT_CODESIGN_IDENTITY}"
+LAUNCH_APP=true
+
+usage() {
+  cat <<USAGE
+Usage: ./build.sh [--no-launch]
+
+Builds, packages, and signs NetSpeedMonitor.
+
+Options:
+  --no-launch   Build and sign the app without opening it.
+  -h, --help    Show this help.
+USAGE
+}
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --no-launch)
+      LAUNCH_APP=false
+      shift
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    *)
+      echo "Unknown option: $1" >&2
+      usage >&2
+      exit 64
+      ;;
+  esac
+done
 
 migrate_music_blocker_preferences() {
   local legacy_preferences="$HOME/Library/Preferences/$BUNDLE_ID.plist"
@@ -47,8 +78,18 @@ echo "=== Building NetSpeedMonitor ==="
 # 1. Compile Swift sources
 echo "Compiling Swift files..."
 mkdir -p "$DIST_DIR"
+swift_sources=()
+while IFS= read -r source_file; do
+  swift_sources+=("$source_file")
+done < <(find NetSpeedMonitor -name "*.swift" | sort)
+
+if [[ ${#swift_sources[@]} -eq 0 ]]; then
+  echo "No Swift sources found under NetSpeedMonitor." >&2
+  exit 66
+fi
+
 swiftc -o "$DIST_DIR/NetSpeedMonitor_bin" \
-  $(find NetSpeedMonitor -name "*.swift")
+  "${swift_sources[@]}"
 
 
 # 2. Package into .app bundle
@@ -113,7 +154,7 @@ PLIST
 
 # 4. Codesign
 echo "Signing the App Bundle..."
-if security find-identity -v -p codesigning | grep -Fq "\"$CODESIGN_IDENTITY\""; then
+if security find-identity -p codesigning | grep -Fq "\"$CODESIGN_IDENTITY\""; then
   SIGN_VALUE="$CODESIGN_IDENTITY"
   echo "Using signing identity: $CODESIGN_IDENTITY"
 else
@@ -129,12 +170,17 @@ fi
 
 echo "=== Build Successful! ==="
 echo "App is saved at: $APP_BUNDLE"
-echo "Launching app..."
 
 migrate_music_blocker_preferences
 
-# Kill running instance if any
-pkill -x "$APP_NAME" || true
-sleep 0.5
-open "$APP_BUNDLE"
-echo "Launched $APP_NAME.app successfully!"
+if [[ "$LAUNCH_APP" == true ]]; then
+  echo "Launching app..."
+
+  # Kill running instance if any
+  pkill -x "$APP_NAME" || true
+  sleep 0.5
+  open "$APP_BUNDLE"
+  echo "Launched $APP_NAME.app successfully!"
+else
+  echo "Skipping launch because --no-launch was supplied."
+fi

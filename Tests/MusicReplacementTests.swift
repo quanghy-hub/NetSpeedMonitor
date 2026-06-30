@@ -1,17 +1,11 @@
-import AppKit
 import Foundation
 
-@main
-struct MusicReplacementTests {
-    @MainActor
-    static func main() throws {
+enum MusicReplacementTests {
+    static func run() throws {
         try testEmptyValueDisablesReplacement()
         try testWebsiteValidation()
         try testApplicationValidation()
         try testBlockedApplicationValidation()
-        try testWideGamutColorArchive()
-        testMediaPlayKeyParsing()
-        print("MusicReplacementTests: all tests passed")
     }
 
     private static func testEmptyValueDisablesReplacement() throws {
@@ -71,35 +65,6 @@ struct MusicReplacementTests {
         }
     }
 
-    private static func testWideGamutColorArchive() throws {
-        let original = NSColor(displayP3Red: 1, green: 0.1, blue: 0.2, alpha: 1)
-        guard let archive = ColorArchive.encode(original),
-              let restored = ColorArchive.decode(archive),
-              let restoredP3 = restored.usingColorSpace(.displayP3) else {
-            fatalError("Display P3 color should round-trip through secure storage")
-        }
-
-        expect(restored.colorSpace == .displayP3, "The original Display P3 color space should be preserved")
-        expect(abs(restoredP3.redComponent - 1) < 0.0001, "The red component should be preserved")
-        expect(abs(restoredP3.greenComponent - 0.1) < 0.0001, "The green component should be preserved")
-        expect(abs(restoredP3.blueComponent - 0.2) < 0.0001, "The blue component should be preserved")
-        expect(ColorArchive.resolve("invalid", fallbackHex: "#123456").toHex() == "#123456", "Invalid archives should use the HEX fallback")
-    }
-
-    @MainActor
-    private static func testMediaPlayKeyParsing() {
-        let playKeyDown = (16 << 16) | (0xA << 8)
-        let playKeyUp = (16 << 16) | (0xB << 8)
-        let repeatedPlayKeyDown = playKeyDown | 0x1
-        let nextKeyDown = (17 << 16) | (0xA << 8)
-
-        expect(MediaPlayKeyMonitor.isInitialPlayPress(data1: playKeyDown), "Play key-down should be handled")
-        expect(!MediaPlayKeyMonitor.isInitialPlayPress(data1: playKeyUp), "Play key-up should be ignored")
-        expect(!MediaPlayKeyMonitor.isInitialPlayPress(data1: repeatedPlayKeyDown), "Repeated Play should be ignored")
-        expect(!MediaPlayKeyMonitor.isInitialPlayPress(data1: nextKeyDown), "Other media keys should be ignored")
-    }
-
-
     private static func makeTemporaryDirectory() throws -> URL {
         let url = FileManager.default.temporaryDirectory
             .appendingPathComponent("NetSpeedMonitorTests-\(UUID().uuidString)")
@@ -119,9 +84,5 @@ struct MusicReplacementTests {
         } catch {
             fatalError("Unexpected error: \(error)")
         }
-    }
-
-    private static func expect(_ condition: @autoclosure () -> Bool, _ message: String) {
-        guard condition() else { fatalError(message) }
     }
 }

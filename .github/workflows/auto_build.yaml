@@ -16,48 +16,36 @@ jobs:
     - name: Create Build Directory
       run: mkdir -p build
 
-    - name: Build with Xcode
+    - name: Typecheck Swift Sources
       run: |
-        xcodebuild \
-          -project NetSpeedMonitor.xcodeproj \
-          -scheme NetSpeedMonitor \
-          -configuration Release \
-          ARCHS="x86_64 arm64" \
-          ONLY_ACTIVE_ARCH=NO \
-          -destination 'generic/platform=macOS' \
-          CODE_SIGN_IDENTITY="" \
-          CODE_SIGNING_REQUIRED=NO \
-          CODE_SIGNING_ALLOWED=NO \
-          CONFIGURATION_BUILD_DIR=build/Release \
-          clean build
+        swift_sources=()
+        while IFS= read -r source_file; do
+          swift_sources+=("$source_file")
+        done < <(find NetSpeedMonitor -name '*.swift' | sort)
+        swiftc -typecheck "${swift_sources[@]}"
 
-    - name: Verify Architectures
-      run: |
-        EXECUTABLE="build/Release/NetSpeedMonitor.app/Contents/MacOS/NetSpeedMonitor"
-        LIPO_OUTPUT=$(lipo -info "$EXECUTABLE")
-        echo "Binary Architectures: $LIPO_OUTPUT"
-        if [[ ! $LIPO_OUTPUT == *"x86_64"* || ! $LIPO_OUTPUT == *"arm64"* ]]; then
-          echo "::error::Missing required architectures!"
-          exit 1
-        fi
+    - name: Run Tests
+      run: ./test.sh
 
-    - name: Sign Universal Binary
-      run: |
-        codesign --force --deep --sign - \
-          --options=runtime \
-          --timestamp \
-          "build/Release/NetSpeedMonitor.app"
+    - name: Build App Bundle
+      run: ./build.sh --no-launch
+
+    - name: Verify Signature
+      run: codesign -dv --verbose=2 "dist/NetSpeedMonitor.app"
 
     - name: Sanitize Metadata
       run: |
-        xattr -cr "build/Release/NetSpeedMonitor.app"
-        xattr -r -d com.apple.quarantine "build/Release/NetSpeedMonitor.app"
-        xattr -r -d com.apple.metadata:kMDItemWhereFroms "build/Release/NetSpeedMonitor.app"
+        xattr -cr "dist/NetSpeedMonitor.app"
+        xattr -r -d com.apple.quarantine "dist/NetSpeedMonitor.app" || true
+        xattr -r -d com.apple.metadata:kMDItemWhereFroms "dist/NetSpeedMonitor.app" || true
         plutil -replace CFBundleSupportedPlatforms -json '["MacOSX"]' \
-          "build/Release/NetSpeedMonitor.app/Contents/Info.plist"
+          "dist/NetSpeedMonitor.app/Contents/Info.plist"
 
     - name: Create Distribution Package
       run: |
+        mkdir -p build/Release
+        rm -rf build/Release/NetSpeedMonitor.app
+        cp -R dist/NetSpeedMonitor.app build/Release/
         cd build/Release
         ditto -c -k --keepParent NetSpeedMonitor.app NetSpeedMonitor.zip
         shasum -a 256 NetSpeedMonitor.zip > NetSpeedMonitor.sha256
@@ -76,7 +64,7 @@ jobs:
       uses: softprops/action-gh-release@v2
       with:
         draft: true
-        body_path: RELEASE_NOTES.MD
+        body_path: RELEASE_NOTES.md
         files: |
           build/Release/NetSpeedMonitor.zip
           build/Release/NetSpeedMonitor.sha256

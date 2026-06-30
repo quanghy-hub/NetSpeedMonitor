@@ -1,10 +1,13 @@
 import Foundation
 
 enum BrowserAudioScripts {
+    private static let javaScriptNumberLocale = Locale(identifier: "en_US_POSIX")
+
     static func setMediaVolumeJavaScript(volume: Double) -> String {
         let clamped = min(max(volume, 0), 1)
+        let volumeText = String(format: "%.3f", locale: javaScriptNumberLocale, clamped)
         return """
-        (() => { const volume = \(String(format: "%.3f", clamped)); document.querySelectorAll('video,audio').forEach((media) => { media.volume = volume; media.muted = volume === 0; }); return true; })();
+        (() => { const volume = \(volumeText); document.querySelectorAll('video,audio').forEach((media) => { media.volume = volume; media.muted = volume === 0; }); return true; })();
         """.appleScriptEscaped()
     }
     

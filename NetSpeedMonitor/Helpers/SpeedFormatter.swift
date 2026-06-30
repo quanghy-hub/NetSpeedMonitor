@@ -1,6 +1,8 @@
 import Foundation
 
 final class SpeedFormatter {
+    private static let outputLocale = Locale(identifier: "en_US_POSIX")
+
     static func format(upload: Double, download: Double, unit: SpeedUnit) -> String {
         var displayDownload = download
         var displayUpload = upload
@@ -26,6 +28,8 @@ final class SpeedFormatter {
             displayUpload *= 8.0
         }
 
-        return "\(String(format: "%.1f", displayUpload))\n\(String(format: "%.1f", displayDownload))"
+        let uploadText = String(format: "%.1f", locale: outputLocale, displayUpload)
+        let downloadText = String(format: "%.1f", locale: outputLocale, displayDownload)
+        return "\(uploadText)\n\(downloadText)"
     }
 }

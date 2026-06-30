@@ -113,8 +113,10 @@ final class SystemStatsMonitor {
     // MARK: - Battery Info
     
     func getBatteryInfo() -> BatteryInfo {
-        let snapshot = IOPSCopyPowerSourcesInfo().takeRetainedValue()
-        let sources = IOPSCopyPowerSourcesList(snapshot).takeRetainedValue() as Array
+        guard let snapshot = IOPSCopyPowerSourcesInfo()?.takeRetainedValue(),
+              let sources = IOPSCopyPowerSourcesList(snapshot)?.takeRetainedValue() as? [CFTypeRef] else {
+            return BatteryInfo(level: 1.0, isCharging: false, isPluggedIn: false)
+        }
         
         for source in sources {
             if let description = IOPSGetPowerSourceDescription(snapshot, source).takeUnretainedValue() as? [String: Any] {
