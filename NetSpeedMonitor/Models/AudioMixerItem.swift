@@ -48,4 +48,23 @@ struct BrowserAudioTab: Identifiable, Hashable {
             return nil
         }
     }
+
+    init?(line: String, browserName: String) {
+        let fields = line.components(separatedBy: "\t")
+        guard fields.count >= 7,
+              let windowIndex = Int(fields[0]),
+              let tabIndex = Int(fields[1]),
+              let mediaCount = Int(fields[4]),
+              let audibleCount = Int(fields[5]) else { return nil }
+
+        self.browserName = browserName
+        self.windowIndex = windowIndex
+        self.tabIndex = tabIndex
+        self.processID = Int32(fields[2])
+        self.title = fields[3].isEmpty ? "Untitled Tab" : fields[3]
+        self.mediaElementCount = mediaCount
+        self.audibleMediaElementCount = audibleCount
+        self.url = fields[6]
+        self.id = "\(browserName):window:\(windowIndex):tab:\(tabIndex)"
+    }
 }

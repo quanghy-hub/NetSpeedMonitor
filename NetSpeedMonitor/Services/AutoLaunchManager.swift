@@ -3,9 +3,8 @@ import ServiceManagement
 import os.log
 
 final class AutoLaunchManager {
-    static let shared = AutoLaunchManager()
     
-    private init() {}
+    init() {}
     
     var isEnabled: Bool {
         get {

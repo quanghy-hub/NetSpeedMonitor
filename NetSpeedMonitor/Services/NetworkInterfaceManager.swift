@@ -2,12 +2,11 @@ import Foundation
 import SystemConfiguration
 
 final class NetworkInterfaceManager {
-    static let shared = NetworkInterfaceManager()
     
     private var primaryInterface: String?
     private var lastCheckedAt = Date.distantPast
     
-    private init() {}
+    init() {}
     
     func getPrimaryInterface() -> String? {
         let now = Date()

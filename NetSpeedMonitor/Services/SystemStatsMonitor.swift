@@ -2,7 +2,7 @@ import Foundation
 import Darwin
 import IOKit.ps
 
-final class SystemStatsMonitor {
+actor SystemStatsMonitor {
     
     // MARK: - CPU Tracking State
     

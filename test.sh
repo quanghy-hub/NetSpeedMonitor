@@ -9,6 +9,7 @@ trap 'rm -f "$TEST_BINARY"' EXIT
 cd "$ROOT_DIR"
 swiftc \
   NetSpeedMonitor/Models/ColorArchive.swift \
+  NetSpeedMonitor/Models/AudioMixerItem.swift \
   NetSpeedMonitor/Models/MusicReplacement.swift \
   NetSpeedMonitor/Models/SpeedUnit.swift \
   NetSpeedMonitor/Services/BrowserAudioScripts.swift \

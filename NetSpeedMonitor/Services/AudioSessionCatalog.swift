@@ -2,7 +2,7 @@ import AppKit
 import CoreAudio
 import Foundation
 
-final class AudioSessionCatalog {
+actor AudioSessionCatalog {
     private let browserController: BrowserAudioController
     private let volumeStore: AudioVolumePreferenceStore
     private let processVolumeEngine: ProcessVolumeEngine

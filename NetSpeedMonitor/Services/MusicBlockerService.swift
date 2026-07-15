@@ -25,8 +25,6 @@ final class MusicBlockerService {
         }
     }
 
-    static let shared = MusicBlockerService()
-
     var onEvent: ((Event) -> Void)?
 
     private let logger = Logger(

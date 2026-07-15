@@ -1,13 +1,21 @@
 import Foundation
 
-public class NetTrafficStatReceiver: NSObject {
-    @objc public var netTrafficStatMap = NSMutableDictionary()
+public actor NetTrafficStatReceiver {
+    public var netTrafficStatMap = NSMutableDictionary()
     
-    @objc public func reset() {
+    public init() {}
+    
+    public func reset() {
         netTrafficStatMap.removeAllObjects()
     }
     
-    @objc public func getNetTrafficStatMap() -> NSMutableDictionary? {
+    public func getSpeed(for interfaceName: String) -> (upload: Double, download: Double)? {
+        _ = getNetTrafficStatMap()
+        guard let stat = netTrafficStatMap[interfaceName] as? NetTrafficStat else { return nil }
+        return (upload: stat.obytes_per_sec.doubleValue, download: stat.ibytes_per_sec.doubleValue)
+    }
+    
+    private func getNetTrafficStatMap() -> NSMutableDictionary? {
         var ifaddr: UnsafeMutablePointer<ifaddrs>?
         guard getifaddrs(&ifaddr) == 0 else {
             return netTrafficStatMap
