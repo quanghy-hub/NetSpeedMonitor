@@ -1,0 +1,521 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 110;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		0600080EEE1B921D4950E757 /* ProcessGainRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61936D361C66CD246AF80EB1 /* ProcessGainRenderer.swift */; };
+		0A0AF5252F9A18CA54372E37 /* MenuBarState.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC3A9F2F9951E1A7D952CF43 /* MenuBarState.swift */; };
+		0CF33C3C1F7CA0C828B30142 /* AppleScriptRunner.swift in Sources */ = {isa = PBXBuildFile; fileRef = E72484E432D4979042C2C8A6 /* AppleScriptRunner.swift */; };
+		0EE34549D62E8C8D135652F0 /* AutoLaunchManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E8A48D4AC9650AF663058CF /* AutoLaunchManager.swift */; };
+		110C07F4D2537A059AF561F7 /* ProcessVolumeEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4BFCF71344C18AB9F1381F0 /* ProcessVolumeEngine.swift */; };
+		18005F4C2C42ACBCC05A834A /* MediaPlayKeyMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D215161D5612072A0406F01 /* MediaPlayKeyMonitor.swift */; };
+		1AAB5D7D82E65F340788F809 /* ColorArchive.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA56CC80633C51A02D53BE1B /* ColorArchive.swift */; };
+		234BE0C28601258644CBCCA2 /* BatteryInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30EF2068C9C363871DA338B2 /* BatteryInfo.swift */; };
+		2C4EF528FD50A5E519463EF5 /* BatteryBarRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = F38D5C9332B3032AF68B8A7C /* BatteryBarRenderer.swift */; };
+		3E762B8CB09F27642D27D77F /* MenuBarIconGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAAAD8D88B6433C905EDE1F8 /* MenuBarIconGenerator.swift */; };
+		40BC4D9AC65C521E640309B3 /* AppLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E49D0A0561734322332A815 /* AppLogger.swift */; };
+		46ED0409A368061C99A2BABD /* AudioSessionCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7146EF08B29199F42CB9799F /* AudioSessionCatalog.swift */; };
+		48739690DE0D3F54045F8E51 /* SystemStatsMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5611FB47E82BCD1F78ED9145 /* SystemStatsMonitor.swift */; };
+		4C112AEE57D386F1C62890AF /* ResponsibleAudioProcessResolver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41090018D23BDCAC85893071 /* ResponsibleAudioProcessResolver.swift */; };
+		4D3F5F9CAB2E5EA649023C61 /* MusicBlockerService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1C2322F597EBB2585CBF2BA /* MusicBlockerService.swift */; };
+		4EF92F6CB86BFBA34943726D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2AE111AA912F0553181EB15E /* Assets.xcassets */; };
+		50059F1C2A249179ECC999E8 /* MenuBarState+IconRefresh.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9CA96FEEEC1FCF610A09891 /* MenuBarState+IconRefresh.swift */; };
+		5161032A63F7AE04966ADADA /* NetTrafficStatReceiver.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB0F038D2F5E48766E05A91 /* NetTrafficStatReceiver.swift */; };
+		5DAF69B955D3E7504DBA6446 /* MenuBarState+AudioMixer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 177E636637F7AD6373A5C59C /* MenuBarState+AudioMixer.swift */; };
+		61F670EA6FC77116C66A7351 /* UsageBarPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 984417B8590006266774F35C /* UsageBarPreview.swift */; };
+		61FCBCFBE7B99623F9FAC07D /* AudioVolumePreferenceStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F67AA7218428151C0F3C931 /* AudioVolumePreferenceStore.swift */; };
+		6DA6104C70509DC18869A8BF /* NetSpeedMonitorApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B627429D000552D955F06D70 /* NetSpeedMonitorApp.swift */; };
+		6E49F2B565FD07F6DB04D325 /* ColorSwatchControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96E8F8173A57DE1F42CA8C64 /* ColorSwatchControl.swift */; };
+		6F84064FE9ED2716AA31210B /* NetworkInterfaceManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 407EA183BF778C194B8D8450 /* NetworkInterfaceManager.swift */; };
+		76496E70611D563F2C7D7B2D /* AudioMixerItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 123A2EAE0EA68BBAB3AEADAD /* AudioMixerItem.swift */; };
+		7DBF5E2D1C9425268FE129E9 /* SpeedUnit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C0F5A80341901C20393158A /* SpeedUnit.swift */; };
+		8FC11549EE8985DE5D9A5BF6 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 26AA30C674D886F5C8E81251 /* Preview Assets.xcassets */; };
+		912CE5C35BB89D80537521EA /* MusicBlockerSectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B21FAC30B668312E43593CAA /* MusicBlockerSectionView.swift */; };
+		9C5BCF2138E590CDFEACD55B /* PersistentColorPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90544F8534DA5AF19C020264 /* PersistentColorPicker.swift */; };
+		A521F8989D4E2D8646586A73 /* SectionHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFE1A08C289AF9B1F41116C6 /* SectionHeader.swift */; };
+		B5700085390976FFDE623F10 /* MenuContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14860099610D53B46321BFC2 /* MenuContentView.swift */; };
+		BA331C2FD81DAD3A051DDAEC /* AudioMixerSectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE7F70AA13ECC06C1E76E9A9 /* AudioMixerSectionView.swift */; };
+		BC1B312C3430DD4981695273 /* ColorPanelController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DF28E39CADE3F7DC28E358B /* ColorPanelController.swift */; };
+		C04F8DFF1FF2A72E46A511B8 /* ColorExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE31B1F407DAB9B5D6FFDC83 /* ColorExtension.swift */; };
+		C77C50F59DC8EAD80F77B5D5 /* MenuBarState+SystemMonitoring.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DCDCB3FFEE190B13CD46494 /* MenuBarState+SystemMonitoring.swift */; };
+		D34A3C15669C0682ECFF9F59 /* BrowserAudioScripts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E18092D905C940A3E7AE724 /* BrowserAudioScripts.swift */; };
+		D8D5050FF0DCC48807C86EDF /* BrowserAudioController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1A22FC27C6CDD12C024BD04 /* BrowserAudioController.swift */; };
+		DAC53B57C7D65CB445108BC2 /* NetSpeedUpdateInterval.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79317592030079E34DBA133C /* NetSpeedUpdateInterval.swift */; };
+		E509E83D55D982433D8AAE33 /* NetTrafficStat.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE94E0BD93C5ED787FDADEF9 /* NetTrafficStat.swift */; };
+		F74ECA7CDF4500A928D16481 /* MenuBarState+MusicBlocker.swift in Sources */ = {isa = PBXBuildFile; fileRef = C825444F445CF72DB5174F61 /* MenuBarState+MusicBlocker.swift */; };
+		F850AC2A8369AA51CEF4175B /* SpeedFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83DABDF1F490DAFDDC08B0C8 /* SpeedFormatter.swift */; };
+		F97B3C8D1DB8E7B2C5EAFDEE /* MusicReplacement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79C7E40F91A71D1D31EA61F7 /* MusicReplacement.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		0C0F5A80341901C20393158A /* SpeedUnit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeedUnit.swift; sourceTree = "<group>"; };
+		123A2EAE0EA68BBAB3AEADAD /* AudioMixerItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioMixerItem.swift; sourceTree = "<group>"; };
+		14860099610D53B46321BFC2 /* MenuContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuContentView.swift; sourceTree = "<group>"; };
+		177E636637F7AD6373A5C59C /* MenuBarState+AudioMixer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MenuBarState+AudioMixer.swift"; sourceTree = "<group>"; };
+		1E18092D905C940A3E7AE724 /* BrowserAudioScripts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserAudioScripts.swift; sourceTree = "<group>"; };
+		1E49D0A0561734322332A815 /* AppLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLogger.swift; sourceTree = "<group>"; };
+		1F67AA7218428151C0F3C931 /* AudioVolumePreferenceStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioVolumePreferenceStore.swift; sourceTree = "<group>"; };
+		26AA30C674D886F5C8E81251 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		2AE111AA912F0553181EB15E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		30EF2068C9C363871DA338B2 /* BatteryInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BatteryInfo.swift; sourceTree = "<group>"; };
+		407EA183BF778C194B8D8450 /* NetworkInterfaceManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkInterfaceManager.swift; sourceTree = "<group>"; };
+		41090018D23BDCAC85893071 /* ResponsibleAudioProcessResolver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResponsibleAudioProcessResolver.swift; sourceTree = "<group>"; };
+		4DCDCB3FFEE190B13CD46494 /* MenuBarState+SystemMonitoring.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MenuBarState+SystemMonitoring.swift"; sourceTree = "<group>"; };
+		5611FB47E82BCD1F78ED9145 /* SystemStatsMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemStatsMonitor.swift; sourceTree = "<group>"; };
+		61936D361C66CD246AF80EB1 /* ProcessGainRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessGainRenderer.swift; sourceTree = "<group>"; };
+		7146EF08B29199F42CB9799F /* AudioSessionCatalog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioSessionCatalog.swift; sourceTree = "<group>"; };
+		79317592030079E34DBA133C /* NetSpeedUpdateInterval.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetSpeedUpdateInterval.swift; sourceTree = "<group>"; };
+		79C7E40F91A71D1D31EA61F7 /* MusicReplacement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MusicReplacement.swift; sourceTree = "<group>"; };
+		7D215161D5612072A0406F01 /* MediaPlayKeyMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaPlayKeyMonitor.swift; sourceTree = "<group>"; };
+		7DF28E39CADE3F7DC28E358B /* ColorPanelController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorPanelController.swift; sourceTree = "<group>"; };
+		83DABDF1F490DAFDDC08B0C8 /* SpeedFormatter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeedFormatter.swift; sourceTree = "<group>"; };
+		90544F8534DA5AF19C020264 /* PersistentColorPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistentColorPicker.swift; sourceTree = "<group>"; };
+		96E8F8173A57DE1F42CA8C64 /* ColorSwatchControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorSwatchControl.swift; sourceTree = "<group>"; };
+		984417B8590006266774F35C /* UsageBarPreview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsageBarPreview.swift; sourceTree = "<group>"; };
+		9E8A48D4AC9650AF663058CF /* AutoLaunchManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoLaunchManager.swift; sourceTree = "<group>"; };
+		A4BFCF71344C18AB9F1381F0 /* ProcessVolumeEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessVolumeEngine.swift; sourceTree = "<group>"; };
+		AE7F70AA13ECC06C1E76E9A9 /* AudioMixerSectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioMixerSectionView.swift; sourceTree = "<group>"; };
+		B1A22FC27C6CDD12C024BD04 /* BrowserAudioController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserAudioController.swift; sourceTree = "<group>"; };
+		B21FAC30B668312E43593CAA /* MusicBlockerSectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MusicBlockerSectionView.swift; sourceTree = "<group>"; };
+		B627429D000552D955F06D70 /* NetSpeedMonitorApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetSpeedMonitorApp.swift; sourceTree = "<group>"; };
+		B9CA96FEEEC1FCF610A09891 /* MenuBarState+IconRefresh.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MenuBarState+IconRefresh.swift"; sourceTree = "<group>"; };
+		BA56CC80633C51A02D53BE1B /* ColorArchive.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorArchive.swift; sourceTree = "<group>"; };
+		BC3A9F2F9951E1A7D952CF43 /* MenuBarState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarState.swift; sourceTree = "<group>"; };
+		BE94E0BD93C5ED787FDADEF9 /* NetTrafficStat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetTrafficStat.swift; sourceTree = "<group>"; };
+		BFE1A08C289AF9B1F41116C6 /* SectionHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SectionHeader.swift; sourceTree = "<group>"; };
+		C825444F445CF72DB5174F61 /* MenuBarState+MusicBlocker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MenuBarState+MusicBlocker.swift"; sourceTree = "<group>"; };
+		CE31B1F407DAB9B5D6FFDC83 /* ColorExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorExtension.swift; sourceTree = "<group>"; };
+		D1C2322F597EBB2585CBF2BA /* MusicBlockerService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MusicBlockerService.swift; sourceTree = "<group>"; };
+		E72484E432D4979042C2C8A6 /* AppleScriptRunner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleScriptRunner.swift; sourceTree = "<group>"; };
+		E945931D509F0EC52EF8ED79 /* NetSpeedMonitor.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NetSpeedMonitor.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		EAAAD8D88B6433C905EDE1F8 /* MenuBarIconGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarIconGenerator.swift; sourceTree = "<group>"; };
+		F38D5C9332B3032AF68B8A7C /* BatteryBarRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BatteryBarRenderer.swift; sourceTree = "<group>"; };
+		FAB0F038D2F5E48766E05A91 /* NetTrafficStatReceiver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetTrafficStatReceiver.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		1FC6697F0C690DA4635A12D8 /* Support */ = {
+			isa = PBXGroup;
+			children = (
+				1E49D0A0561734322332A815 /* AppLogger.swift */,
+			);
+			path = Support;
+			sourceTree = "<group>";
+		};
+		37B008ACC35945B33CEF40B2 /* Helpers */ = {
+			isa = PBXGroup;
+			children = (
+				CE31B1F407DAB9B5D6FFDC83 /* ColorExtension.swift */,
+				83DABDF1F490DAFDDC08B0C8 /* SpeedFormatter.swift */,
+			);
+			path = Helpers;
+			sourceTree = "<group>";
+		};
+		3A57F145DC15BE33BEF42B2C /* Preview Content */ = {
+			isa = PBXGroup;
+			children = (
+				26AA30C674D886F5C8E81251 /* Preview Assets.xcassets */,
+			);
+			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		6724AC67E78709F61C22A124 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				AE7F70AA13ECC06C1E76E9A9 /* AudioMixerSectionView.swift */,
+				96E8F8173A57DE1F42CA8C64 /* ColorSwatchControl.swift */,
+				14860099610D53B46321BFC2 /* MenuContentView.swift */,
+				B21FAC30B668312E43593CAA /* MusicBlockerSectionView.swift */,
+				90544F8534DA5AF19C020264 /* PersistentColorPicker.swift */,
+				BFE1A08C289AF9B1F41116C6 /* SectionHeader.swift */,
+				984417B8590006266774F35C /* UsageBarPreview.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		74FDFFD1BE75E4F00F2C0938 = {
+			isa = PBXGroup;
+			children = (
+				FC80599EE09FA517BB45E6AE /* NetSpeedMonitor */,
+				D22439D7ECA618C57520EFF8 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		781F75E6E86FB8DDB0281DE3 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				E72484E432D4979042C2C8A6 /* AppleScriptRunner.swift */,
+				7146EF08B29199F42CB9799F /* AudioSessionCatalog.swift */,
+				1F67AA7218428151C0F3C931 /* AudioVolumePreferenceStore.swift */,
+				9E8A48D4AC9650AF663058CF /* AutoLaunchManager.swift */,
+				B1A22FC27C6CDD12C024BD04 /* BrowserAudioController.swift */,
+				1E18092D905C940A3E7AE724 /* BrowserAudioScripts.swift */,
+				7DF28E39CADE3F7DC28E358B /* ColorPanelController.swift */,
+				7D215161D5612072A0406F01 /* MediaPlayKeyMonitor.swift */,
+				D1C2322F597EBB2585CBF2BA /* MusicBlockerService.swift */,
+				FAB0F038D2F5E48766E05A91 /* NetTrafficStatReceiver.swift */,
+				407EA183BF778C194B8D8450 /* NetworkInterfaceManager.swift */,
+				61936D361C66CD246AF80EB1 /* ProcessGainRenderer.swift */,
+				A4BFCF71344C18AB9F1381F0 /* ProcessVolumeEngine.swift */,
+				41090018D23BDCAC85893071 /* ResponsibleAudioProcessResolver.swift */,
+				5611FB47E82BCD1F78ED9145 /* SystemStatsMonitor.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		C6FD4897673CEC045AF466B0 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				123A2EAE0EA68BBAB3AEADAD /* AudioMixerItem.swift */,
+				30EF2068C9C363871DA338B2 /* BatteryInfo.swift */,
+				BA56CC80633C51A02D53BE1B /* ColorArchive.swift */,
+				79C7E40F91A71D1D31EA61F7 /* MusicReplacement.swift */,
+				79317592030079E34DBA133C /* NetSpeedUpdateInterval.swift */,
+				BE94E0BD93C5ED787FDADEF9 /* NetTrafficStat.swift */,
+				0C0F5A80341901C20393158A /* SpeedUnit.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		D22439D7ECA618C57520EFF8 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				E945931D509F0EC52EF8ED79 /* NetSpeedMonitor.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		DA07043BEFCCF5DAEC30E1DE /* Drawing */ = {
+			isa = PBXGroup;
+			children = (
+				F38D5C9332B3032AF68B8A7C /* BatteryBarRenderer.swift */,
+				EAAAD8D88B6433C905EDE1F8 /* MenuBarIconGenerator.swift */,
+			);
+			path = Drawing;
+			sourceTree = "<group>";
+		};
+		FC80599EE09FA517BB45E6AE /* NetSpeedMonitor */ = {
+			isa = PBXGroup;
+			children = (
+				2AE111AA912F0553181EB15E /* Assets.xcassets */,
+				BC3A9F2F9951E1A7D952CF43 /* MenuBarState.swift */,
+				177E636637F7AD6373A5C59C /* MenuBarState+AudioMixer.swift */,
+				B9CA96FEEEC1FCF610A09891 /* MenuBarState+IconRefresh.swift */,
+				C825444F445CF72DB5174F61 /* MenuBarState+MusicBlocker.swift */,
+				4DCDCB3FFEE190B13CD46494 /* MenuBarState+SystemMonitoring.swift */,
+				B627429D000552D955F06D70 /* NetSpeedMonitorApp.swift */,
+				DA07043BEFCCF5DAEC30E1DE /* Drawing */,
+				37B008ACC35945B33CEF40B2 /* Helpers */,
+				C6FD4897673CEC045AF466B0 /* Models */,
+				3A57F145DC15BE33BEF42B2C /* Preview Content */,
+				781F75E6E86FB8DDB0281DE3 /* Services */,
+				1FC6697F0C690DA4635A12D8 /* Support */,
+				6724AC67E78709F61C22A124 /* Views */,
+			);
+			path = NetSpeedMonitor;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		0C0B429DA22B06451B264C65 /* NetSpeedMonitor */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C64D8BD8266208C07DEA705E /* Build configuration list for PBXNativeTarget "NetSpeedMonitor" */;
+			buildPhases = (
+				39FAC07D2B953E82E4479C14 /* Sources */,
+				C8A9943558A5131694FF8251 /* Resources */,
+			);
+			buildRules = (
+			);
+			name = NetSpeedMonitor;
+			productName = NetSpeedMonitor;
+			productReference = E945931D509F0EC52EF8ED79 /* NetSpeedMonitor.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		DD291C863F909707F0D33851 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 2700;
+				TargetAttributes = {
+					0C0B429DA22B06451B264C65 = {
+						DevelopmentTeam = "";
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = A61E1A50FD04D3AB241CE634 /* Build configuration list for PBXProject "NetSpeedMonitor" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 74FDFFD1BE75E4F00F2C0938;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 110;
+			productRefGroup = D22439D7ECA618C57520EFF8 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				0C0B429DA22B06451B264C65 /* NetSpeedMonitor */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		C8A9943558A5131694FF8251 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			files = (
+				4EF92F6CB86BFBA34943726D /* Assets.xcassets in Resources */,
+				8FC11549EE8985DE5D9A5BF6 /* Preview Assets.xcassets in Resources */,
+			);
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		39FAC07D2B953E82E4479C14 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			files = (
+				40BC4D9AC65C521E640309B3 /* AppLogger.swift in Sources */,
+				0CF33C3C1F7CA0C828B30142 /* AppleScriptRunner.swift in Sources */,
+				76496E70611D563F2C7D7B2D /* AudioMixerItem.swift in Sources */,
+				BA331C2FD81DAD3A051DDAEC /* AudioMixerSectionView.swift in Sources */,
+				46ED0409A368061C99A2BABD /* AudioSessionCatalog.swift in Sources */,
+				61FCBCFBE7B99623F9FAC07D /* AudioVolumePreferenceStore.swift in Sources */,
+				0EE34549D62E8C8D135652F0 /* AutoLaunchManager.swift in Sources */,
+				2C4EF528FD50A5E519463EF5 /* BatteryBarRenderer.swift in Sources */,
+				234BE0C28601258644CBCCA2 /* BatteryInfo.swift in Sources */,
+				D8D5050FF0DCC48807C86EDF /* BrowserAudioController.swift in Sources */,
+				D34A3C15669C0682ECFF9F59 /* BrowserAudioScripts.swift in Sources */,
+				1AAB5D7D82E65F340788F809 /* ColorArchive.swift in Sources */,
+				C04F8DFF1FF2A72E46A511B8 /* ColorExtension.swift in Sources */,
+				BC1B312C3430DD4981695273 /* ColorPanelController.swift in Sources */,
+				6E49F2B565FD07F6DB04D325 /* ColorSwatchControl.swift in Sources */,
+				18005F4C2C42ACBCC05A834A /* MediaPlayKeyMonitor.swift in Sources */,
+				3E762B8CB09F27642D27D77F /* MenuBarIconGenerator.swift in Sources */,
+				5DAF69B955D3E7504DBA6446 /* MenuBarState+AudioMixer.swift in Sources */,
+				50059F1C2A249179ECC999E8 /* MenuBarState+IconRefresh.swift in Sources */,
+				F74ECA7CDF4500A928D16481 /* MenuBarState+MusicBlocker.swift in Sources */,
+				C77C50F59DC8EAD80F77B5D5 /* MenuBarState+SystemMonitoring.swift in Sources */,
+				0A0AF5252F9A18CA54372E37 /* MenuBarState.swift in Sources */,
+				B5700085390976FFDE623F10 /* MenuContentView.swift in Sources */,
+				912CE5C35BB89D80537521EA /* MusicBlockerSectionView.swift in Sources */,
+				4D3F5F9CAB2E5EA649023C61 /* MusicBlockerService.swift in Sources */,
+				F97B3C8D1DB8E7B2C5EAFDEE /* MusicReplacement.swift in Sources */,
+				6DA6104C70509DC18869A8BF /* NetSpeedMonitorApp.swift in Sources */,
+				DAC53B57C7D65CB445108BC2 /* NetSpeedUpdateInterval.swift in Sources */,
+				E509E83D55D982433D8AAE33 /* NetTrafficStat.swift in Sources */,
+				5161032A63F7AE04966ADADA /* NetTrafficStatReceiver.swift in Sources */,
+				6F84064FE9ED2716AA31210B /* NetworkInterfaceManager.swift in Sources */,
+				9C5BCF2138E590CDFEACD55B /* PersistentColorPicker.swift in Sources */,
+				0600080EEE1B921D4950E757 /* ProcessGainRenderer.swift in Sources */,
+				110C07F4D2537A059AF561F7 /* ProcessVolumeEngine.swift in Sources */,
+				4C112AEE57D386F1C62890AF /* ResponsibleAudioProcessResolver.swift in Sources */,
+				A521F8989D4E2D8646586A73 /* SectionHeader.swift in Sources */,
+				F850AC2A8369AA51CEF4175B /* SpeedFormatter.swift in Sources */,
+				7DBF5E2D1C9425268FE129E9 /* SpeedUnit.swift in Sources */,
+				48739690DE0D3F54045F8E51 /* SystemStatsMonitor.swift in Sources */,
+				61F670EA6FC77116C66A7351 /* UsageBarPreview.swift in Sources */,
+			);
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		0941FD6A4692664D2773DC6A /* Release configuration for PBXNativeTarget "NetSpeedMonitor" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = NetSpeedMonitor/NetSpeedMonitor.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
+				DEVELOPMENT_TEAM = "";
+				INFOPLIST_FILE = NetSpeedMonitor/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.4;
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.elegracer.NetSpeedMonitor;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		8AA9C4977F6956D7A2A32844 /* Debug configuration for PBXNativeTarget "NetSpeedMonitor" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = NetSpeedMonitor/NetSpeedMonitor.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
+				DEVELOPMENT_TEAM = "";
+				INFOPLIST_FILE = NetSpeedMonitor/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.4;
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.elegracer.NetSpeedMonitor;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		B378C4DD84765FD12B0098BD /* Release configuration for PBXProject "NetSpeedMonitor" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		F4BD7953BB61CE58FD00F568 /* Debug configuration for PBXProject "NetSpeedMonitor" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		A61E1A50FD04D3AB241CE634 /* Build configuration list for PBXProject "NetSpeedMonitor" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F4BD7953BB61CE58FD00F568 /* Debug configuration for PBXProject "NetSpeedMonitor" */,
+				B378C4DD84765FD12B0098BD /* Release configuration for PBXProject "NetSpeedMonitor" */,
+			);
+			defaultConfigurationName = Debug;
+		};
+		C64D8BD8266208C07DEA705E /* Build configuration list for PBXNativeTarget "NetSpeedMonitor" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8AA9C4977F6956D7A2A32844 /* Debug configuration for PBXNativeTarget "NetSpeedMonitor" */,
+				0941FD6A4692664D2773DC6A /* Release configuration for PBXNativeTarget "NetSpeedMonitor" */,
+			);
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = DD291C863F909707F0D33851 /* Project object */;
+}
