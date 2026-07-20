@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct MusicBlockerSectionView: View {
-    @EnvironmentObject private var menuBarState: MenuBarState
+    @EnvironmentObject private var musicBlockerVM: MusicBlockerViewModel
     @State private var isConfirmingEnable = false
     @State private var isEditingReplacement = false
 
@@ -15,56 +15,56 @@ struct MusicBlockerSectionView: View {
 
                 Spacer()
 
-                if menuBarState.xmusicEnabled {
-                    Button(menuBarState.xmusicReplacement.isEmpty ? "Set Replacement..." : "Change...") {
+                if musicBlockerVM.isEnabled {
+                    Button(musicBlockerVM.replacement.isEmpty ? "Set Replacement..." : "Change...") {
                         isEditingReplacement = true
                     }
                     .controlSize(.small)
 
-                    if !menuBarState.xmusicReplacement.isEmpty {
+                    if !musicBlockerVM.replacement.isEmpty {
                         Button("Clear") {
-                            menuBarState.saveMusicReplacement("")
+                            _ = musicBlockerVM.saveReplacement("")
                         }
                         .controlSize(.small)
                     }
                 }
             }
 
-            if menuBarState.xmusicEnabled {
-                if !menuBarState.xmusicReplacement.isEmpty {
-                    Text("Instead open: \(menuBarState.xmusicReplacement)")
+            if musicBlockerVM.isEnabled {
+                if !musicBlockerVM.replacement.isEmpty {
+                    Text("Instead open: \(musicBlockerVM.replacement)")
                         .lineLimit(1)
                         .truncationMode(.middle)
                 }
 
-                Text(menuBarState.musicBlockerStatus)
-                    .foregroundStyle(menuBarState.musicBlockerHasError ? Color.red : Color.secondary)
+                Text(musicBlockerVM.status)
+                    .foregroundStyle(musicBlockerVM.hasError ? Color.red : Color.secondary)
             }
         }
         .font(.system(size: 11, design: .rounded))
         .alert("Enable Music Blocker?", isPresented: $isConfirmingEnable) {
             Button("Enable") {
-                menuBarState.xmusicEnabled = true
+                musicBlockerVM.isEnabled = true
             }
             Button("Cancel", role: .cancel) {}
         } message: {
             Text("Apple Music or iTunes will be closed when detected. A configured replacement opens only after the blocked app has stopped.")
         }
         .sheet(isPresented: $isEditingReplacement) {
-            MusicReplacementEditor(initialValue: menuBarState.xmusicReplacement) { value in
-                menuBarState.saveMusicReplacement(value)
+            MusicReplacementEditor(initialValue: musicBlockerVM.replacement) { value in
+                musicBlockerVM.saveReplacement(value)
             }
         }
     }
 
     private var enabledBinding: Binding<Bool> {
         Binding(
-            get: { menuBarState.xmusicEnabled },
+            get: { musicBlockerVM.isEnabled },
             set: { newValue in
                 if newValue {
                     isConfirmingEnable = true
                 } else {
-                    menuBarState.xmusicEnabled = false
+                    musicBlockerVM.isEnabled = false
                 }
             }
         )

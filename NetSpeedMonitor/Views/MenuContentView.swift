@@ -1,7 +1,8 @@
 import SwiftUI
 
 struct MenuContentView: View {
-    @EnvironmentObject var menuBarState: MenuBarState
+    @EnvironmentObject var settingsVM: SettingsViewModel
+    @EnvironmentObject var systemVM: SystemMonitorViewModel
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -11,61 +12,55 @@ struct MenuContentView: View {
 
             // CPU Row
             HStack(spacing: 8) {
-                Toggle("CPU", isOn: $menuBarState.showCPUBar)
+                Toggle("CPU", isOn: $settingsVM.showCPUBar)
                     .toggleStyle(.checkbox)
                     .frame(width: 52, alignment: .leading)
 
                 UsageBarPreview(
-                    usage: menuBarState.cpuUsage,
-                    color: Color(nsColor: menuBarState.cpuBarColor)
+                    usage: systemVM.cpuUsage,
+                    color: settingsVM.cpuBarColor
                 )
 
-                PersistentColorPicker(
-                    hex: $menuBarState.cpuBarColorHex,
-                    archive: $menuBarState.cpuBarColorArchive
-                )
-                .frame(width: 22, height: 22)
-                .disabled(!menuBarState.showCPUBar)
+                ColorPicker("", selection: $settingsVM.cpuBarColor)
+                    .labelsHidden()
+                    .frame(width: 22, height: 22)
+                    .disabled(!settingsVM.showCPUBar)
             }
 
             // RAM Row
             HStack(spacing: 8) {
-                Toggle("RAM", isOn: $menuBarState.showRAMBar)
+                Toggle("RAM", isOn: $settingsVM.showRAMBar)
                     .toggleStyle(.checkbox)
                     .frame(width: 52, alignment: .leading)
 
                 UsageBarPreview(
-                    usage: menuBarState.ramUsage,
-                    color: Color(nsColor: menuBarState.ramBarColor)
+                    usage: systemVM.ramUsage,
+                    color: settingsVM.ramBarColor
                 )
 
-                PersistentColorPicker(
-                    hex: $menuBarState.ramBarColorHex,
-                    archive: $menuBarState.ramBarColorArchive
-                )
-                .frame(width: 22, height: 22)
-                .disabled(!menuBarState.showRAMBar)
+                ColorPicker("", selection: $settingsVM.ramBarColor)
+                    .labelsHidden()
+                    .frame(width: 22, height: 22)
+                    .disabled(!settingsVM.showRAMBar)
             }
 
             // Battery Row
             HStack(spacing: 8) {
-                Toggle("BAT", isOn: $menuBarState.showBatteryBar)
+                Toggle("BAT", isOn: $settingsVM.showBatteryBar)
                     .toggleStyle(.checkbox)
                     .frame(width: 52, alignment: .leading)
 
                 UsageBarPreview(
-                    usage: menuBarState.batteryLevel,
-                    color: Color(nsColor: menuBarState.batteryBarColor),
+                    usage: systemVM.batteryLevel,
+                    color: settingsVM.batteryBarColor,
                     useThresholdColoring: false,
-                    suffix: menuBarState.batteryIsCharging ? " ⚡" : ""
+                    suffix: systemVM.batteryIsCharging ? " ⚡" : ""
                 )
 
-                PersistentColorPicker(
-                    hex: $menuBarState.batteryBarColorHex,
-                    archive: $menuBarState.batteryBarColorArchive
-                )
-                .frame(width: 22, height: 22)
-                .disabled(!menuBarState.showBatteryBar)
+                ColorPicker("", selection: $settingsVM.batteryBarColor)
+                    .labelsHidden()
+                    .frame(width: 22, height: 22)
+                    .disabled(!settingsVM.showBatteryBar)
             }
 
             Divider()
@@ -86,8 +81,8 @@ struct MenuContentView: View {
                     Toggle(
                         interval.displayName,
                         isOn: Binding(
-                            get: { menuBarState.netSpeedUpdateInterval == interval },
-                            set: { if $0 { menuBarState.netSpeedUpdateInterval = interval } }
+                            get: { settingsVM.netSpeedUpdateInterval == interval },
+                            set: { if $0 { settingsVM.netSpeedUpdateInterval = interval } }
                         )
                     )
                     .toggleStyle(.button)
@@ -105,8 +100,8 @@ struct MenuContentView: View {
                     Toggle(
                         unit.rawValue,
                         isOn: Binding(
-                            get: { menuBarState.speedUnit == unit },
-                            set: { if $0 { menuBarState.speedUnit = unit } }
+                            get: { settingsVM.speedUnit == unit },
+                            set: { if $0 { settingsVM.speedUnit = unit } }
                         )
                     )
                     .toggleStyle(.button)
@@ -118,9 +113,9 @@ struct MenuContentView: View {
 
             // MARK: - Actions
             HStack(spacing: 8) {
-                Toggle("Start at Login", isOn: $menuBarState.autoLaunchEnabled)
+                Toggle("Start at Login", isOn: $settingsVM.autoLaunchEnabled)
                     .toggleStyle(.checkbox)
-                    .onChange(of: menuBarState.autoLaunchEnabled, initial: false) { oldState, newState in
+                    .onChange(of: settingsVM.autoLaunchEnabled, initial: false) { oldState, newState in
                         logger.info("Toggle::StartAtLogin: oldState：\(oldState), newState: \(newState)")
                     }
 

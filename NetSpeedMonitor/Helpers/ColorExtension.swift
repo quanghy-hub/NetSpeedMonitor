@@ -26,6 +26,21 @@ extension Color {
             opacity: Double(a) / 255.0
         )
     }
+
+    /// Convert Color to hex string via NSColor
+    func toHex() -> String {
+        NSColor(self).toHex()
+    }
+}
+
+extension Color: @retroactive RawRepresentable {
+    public init?(rawValue: String) {
+        self.init(hex: rawValue)
+    }
+
+    public var rawValue: String {
+        self.toHex()
+    }
 }
 
 extension NSColor {

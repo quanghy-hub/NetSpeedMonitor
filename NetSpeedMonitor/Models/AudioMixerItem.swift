@@ -14,7 +14,7 @@ struct AudioMixerItem: Identifiable, Hashable {
     let subtitle: String
     let isAudible: Bool
     let canSetVolume: Bool
-    let volume: Double
+    var volume: Double
     let maxVolume: Double
     let audioObjectIDs: [UInt32]
 

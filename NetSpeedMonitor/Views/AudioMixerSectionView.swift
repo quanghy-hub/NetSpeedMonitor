@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct AudioMixerSectionView: View {
-    @EnvironmentObject var menuBarState: MenuBarState
+    @EnvironmentObject var audioMixerVM: AudioMixerViewModel
     
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -14,25 +14,25 @@ struct AudioMixerSectionView: View {
                 Spacer()
                 
                 Button {
-                    menuBarState.refreshAudioMixer()
+                    audioMixerVM.refreshAudioMixer()
                 } label: {
                     Image(systemName: "arrow.clockwise")
                         .font(.system(size: 11, weight: .semibold))
                 }
                 .buttonStyle(.plain)
                 .foregroundStyle(.secondary)
-                .disabled(menuBarState.isAudioMixerRefreshing)
+                .disabled(audioMixerVM.isAudioMixerRefreshing)
             }
             
-            if menuBarState.audioMixerItems.isEmpty {
-                Text(menuBarState.audioMixerStatus)
+            if audioMixerVM.audioMixerItems.isEmpty {
+                Text(audioMixerVM.audioMixerStatus)
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.vertical, 8)
             } else {
                 VStack(spacing: 12) {
-                    ForEach(menuBarState.audioMixerItems) { item in
+                    ForEach(audioMixerVM.audioMixerItems) { item in
                         AudioMixerRow(item: item)
                     }
                 }
@@ -48,7 +48,7 @@ struct AudioMixerSectionView: View {
 }
 
 private struct AudioMixerRow: View {
-    @EnvironmentObject var menuBarState: MenuBarState
+    @EnvironmentObject var audioMixerVM: AudioMixerViewModel
     let item: AudioMixerItem
     
     var body: some View {
@@ -64,7 +64,7 @@ private struct AudioMixerRow: View {
             VolumeTrack(
                 value: Binding(
                     get: { item.volume },
-                    set: { menuBarState.setAudioVolume($0, for: item.id) }
+                    set: { audioMixerVM.setAudioVolume($0, for: item.id) }
                 ),
                 range: 0...item.maxVolume
             )
@@ -77,7 +77,7 @@ private struct AudioMixerRow: View {
                 .frame(width: 42, alignment: .trailing)
             
             Button {
-                menuBarState.setAudioVolume(1, for: item.id, commitImmediately: true)
+                audioMixerVM.setAudioVolume(1, for: item.id, commitImmediately: true)
             } label: {
                 Image(systemName: "arrow.counterclockwise")
                     .font(.system(size: 12, weight: .semibold))
