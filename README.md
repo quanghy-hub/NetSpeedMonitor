@@ -1,4 +1,6 @@
 # NetSpeedMonitor
+[![Build Status](https://img.shields.io/github/actions/workflow/status/quanghy-hub/NetSpeedMonitor/build.yml?branch=main)](https://github.com/quanghy-hub/NetSpeedMonitor/actions)
+
 
 NetSpeedMonitor is a macOS menu bar app for quick network, system, and audio controls.
 
@@ -22,7 +24,19 @@ Per-process network traffic monitoring usually requires `nettop`, which is too C
 
 The UI is built with SwiftUI as an `LSUIElement` menu-bar app. The Xcode project includes `NSAudioCaptureUsageDescription` because the per-app audio mixer uses local CoreAudio process taps.
 
-To build the app:
+## Prerequisites
+
+- **macOS:** 14.6 or later
+- **Xcode:** 16.0 or later
+
+## Documentation
+
+- [Architecture Overview](ARCHITECTURE.md)
+- [Contributing Guidelines](CONTRIBUTING.md)
+- [Changelog](CHANGELOG.md)
+
+## Building the App
+
 Open `NetSpeedMonitor.xcodeproj` in Xcode, select the `NetSpeedMonitor` target, and click Build or Run.
 
 Any PR for feature enhancement or compatibility improvement is welcome.

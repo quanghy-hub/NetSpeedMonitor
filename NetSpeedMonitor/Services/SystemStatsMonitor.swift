@@ -2,6 +2,9 @@ import Foundation
 import Darwin
 import IOKit.ps
 
+/// Actor providing CPU, RAM, and battery statistics using Darwin/Mach kernel APIs.
+/// CPU usage is computed as a delta between successive polling calls.
+/// Properly deallocates Mach kernel pointers (processor_info_array_t) to prevent memory leaks.
 actor SystemStatsMonitor {
     
     // MARK: - CPU Tracking State
@@ -20,6 +23,8 @@ actor SystemStatsMonitor {
     
     // MARK: - CPU Usage (0.0 - 1.0)
     
+    /// Computes CPU usage as a delta between successive polling calls.
+    /// CPU ticks are compared between current state and previous state to calculate delta ticks.
     func getCPUUsage() -> Double {
         var numCPUs: natural_t = 0
         var cpuInfo: processor_info_array_t?
@@ -82,6 +87,8 @@ actor SystemStatsMonitor {
     
     // MARK: - RAM Usage (0.0 - 1.0)
     
+    /// Computes RAM usage by calculating active + wired + compressed memory
+    /// and comparing it against the total physical memory.
     func getRAMUsage() -> Double {
         var count = mach_msg_type_number_t(
             MemoryLayout<vm_statistics64_data_t>.size / MemoryLayout<integer_t>.size
@@ -112,6 +119,7 @@ actor SystemStatsMonitor {
     
     // MARK: - Battery Info
     
+    /// Retrieves battery information using IOKit power source API.
     func getBatteryInfo() -> BatteryInfo {
         guard let snapshot = IOPSCopyPowerSourcesInfo()?.takeRetainedValue(),
               let sources = IOPSCopyPowerSourcesList(snapshot)?.takeRetainedValue() as? [CFTypeRef] else {
@@ -145,3 +153,13 @@ actor SystemStatsMonitor {
         }
     }
 }
+
+
+/// Provides system resource statistics (CPU, RAM, battery).
+protocol SystemStatsProviding: Sendable {
+    func getCPUUsage() async -> Double
+    func getRAMUsage() async -> Double
+    func getBatteryInfo() async -> BatteryInfo
+}
+
+extension SystemStatsMonitor: SystemStatsProviding {}

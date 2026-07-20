@@ -10,17 +10,17 @@ actor AudioSessionCatalog {
     init(
         browserController: BrowserAudioController = BrowserAudioController(),
         volumeStore: AudioVolumePreferenceStore = AudioVolumePreferenceStore(),
-        processVolumeEngine: ProcessVolumeEngine = .shared
+        processVolumeEngine: ProcessVolumeEngine
     ) {
         self.browserController = browserController
         self.volumeStore = volumeStore
         self.processVolumeEngine = processVolumeEngine
     }
     
-    func loadItems() -> [AudioMixerItem] {
+    func loadItems() async -> [AudioMixerItem] {
         let sessions = audioOutputSessions()
         let audiblePIDs = Set(sessions.compactMap(\.processID))
-        let browserTabs = browserController.audibleTabs(matching: audiblePIDs)
+        let browserTabs = await browserController.audibleTabs(matching: audiblePIDs)
         let tabProcessIDs = Set(browserTabs.compactMap(\.processID))
         
         let appItems = sessions
@@ -38,26 +38,26 @@ actor AudioSessionCatalog {
             }
             return lhs.title.localizedCaseInsensitiveCompare(rhs.title) == .orderedAscending
         }
-        processVolumeEngine.reconcile(activeTargets: Dictionary(uniqueKeysWithValues: appItems.map { ($0.id, $0.audioObjectIDs) }))
+        await processVolumeEngine.reconcile(activeTargets: Dictionary(uniqueKeysWithValues: appItems.map { ($0.id, $0.audioObjectIDs) }))
         return items
     }
     
-    func setVolume(_ volume: Double, for item: AudioMixerItem) {
+    func setVolume(_ volume: Double, for item: AudioMixerItem) async {
         volumeStore.setVolume(volume, for: item.id)
         
         switch item.kind {
         case .app:
-            processVolumeEngine.apply(volume: volume, targetID: item.id, audioObjectIDs: item.audioObjectIDs)
+            await processVolumeEngine.apply(volume: volume, targetID: item.id, audioObjectIDs: item.audioObjectIDs)
         case .browserTab:
-            guard let tab = browserController.audibleTabs(matching: []).first(where: { $0.id == item.id }) else {
+            guard let tab = await browserController.audibleTabs(matching: []).first(where: { $0.id == item.id }) else {
                 return
             }
-            _ = browserController.setVolume(volume, for: tab)
+            _ = await browserController.setVolume(volume, for: tab)
         }
     }
     
-    func stop() {
-        processVolumeEngine.stopAll()
+    func stop() async {
+        await processVolumeEngine.stopAll()
     }
     
     private func item(for session: AudioOutputSession) -> AudioMixerItem {
@@ -137,16 +137,24 @@ actor AudioSessionCatalog {
             mScope: kAudioObjectPropertyScopeGlobal,
             mElement: kAudioObjectPropertyElementMain
         )
-        var size: UInt32 = 0
-        guard AudioObjectGetPropertyDataSize(AudioObjectID(kAudioObjectSystemObject), &address, 0, nil, &size) == noErr else {
+        var expectedSize: UInt32 = 0
+        guard AudioObjectGetPropertyDataSize(AudioObjectID(kAudioObjectSystemObject), &address, 0, nil, &expectedSize) == noErr else {
+            logger.warning("Failed to get audio process list size")
             return []
         }
         
-        var objectIDs = [AudioObjectID](repeating: 0, count: Int(size) / MemoryLayout<AudioObjectID>.size)
-        guard AudioObjectGetPropertyData(AudioObjectID(kAudioObjectSystemObject), &address, 0, nil, &size, &objectIDs) == noErr else {
+        guard expectedSize > 0 else {
+            logger.warning("Audio process list size is 0")
             return []
         }
-        return objectIDs
+        
+        var actualSize = expectedSize
+        var objectIDs = [AudioObjectID](repeating: 0, count: Int(expectedSize) / MemoryLayout<AudioObjectID>.size)
+        guard AudioObjectGetPropertyData(AudioObjectID(kAudioObjectSystemObject), &address, 0, nil, &actualSize, &objectIDs) == noErr else {
+            logger.warning("Failed to get audio process list data")
+            return []
+        }
+        return Array(objectIDs.prefix(Int(actualSize) / MemoryLayout<AudioObjectID>.size))
     }
     
     private func read<T>(_ objectID: AudioObjectID, _ selector: AudioObjectPropertySelector, _ value: inout T) -> Bool {
@@ -197,3 +205,13 @@ private struct AudioOutputSession {
         return "app:\(name)"
     }
 }
+
+
+/// Provides audio session discovery and volume control.
+protocol AudioSessionProviding: Sendable {
+    func loadItems() async -> [AudioMixerItem]
+    func setVolume(_ volume: Double, for item: AudioMixerItem) async
+    func stop() async
+}
+
+extension AudioSessionCatalog: AudioSessionProviding {}

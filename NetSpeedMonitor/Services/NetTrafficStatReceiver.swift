@@ -1,24 +1,30 @@
 import Foundation
 
+/// Actor that reads network interface traffic statistics using POSIX getifaddrs() API.
+/// Computes upload/download speed as bytes-per-second delta between successive polls.
+/// Handles counter overflow (UInt32 wrap-around) gracefully.
+/// Uses Swift value types (struct NetTrafficStat) for Sendable safety.
 public actor NetTrafficStatReceiver {
-    public var netTrafficStatMap = NSMutableDictionary()
+    private var stats: [String: NetTrafficStat] = [:]
     
     public init() {}
     
     public func reset() {
-        netTrafficStatMap.removeAllObjects()
+        stats.removeAll()
     }
     
+    /// Retrieves the upload and download speed for a specific interface.
+    /// Performs interface name lookup and uses the delta computation from successive polls.
     public func getSpeed(for interfaceName: String) -> (upload: Double, download: Double)? {
-        _ = getNetTrafficStatMap()
-        guard let stat = netTrafficStatMap[interfaceName] as? NetTrafficStat else { return nil }
-        return (upload: stat.obytes_per_sec.doubleValue, download: stat.ibytes_per_sec.doubleValue)
+        _ = updateStats()
+        guard let stat = stats[interfaceName] else { return nil }
+        return (upload: stat.outBytesPerSec, download: stat.inBytesPerSec)
     }
     
-    private func getNetTrafficStatMap() -> NSMutableDictionary? {
+    private func updateStats() -> [String: NetTrafficStat]? {
         var ifaddr: UnsafeMutablePointer<ifaddrs>?
         guard getifaddrs(&ifaddr) == 0 else {
-            return netTrafficStatMap
+            return stats
         }
         defer { freeifaddrs(ifaddr) }
         
@@ -41,59 +47,66 @@ public actor NetTrafficStatReceiver {
                 if let data = interface.ifa_data {
                     let ifData = data.assumingMemoryBound(to: if_data.self).pointee
                     
-                    let stat: NetTrafficStat
-                    if let existing = netTrafficStatMap[name] as? NetTrafficStat {
-                        stat = existing
-                    } else {
-                        stat = NetTrafficStat()
-                        netTrafficStatMap[name] = stat
-                    }
+                    var stat = stats[name] ?? NetTrafficStat()
                     
                     let current_ibytes = ifData.ifi_ibytes
                     let current_obytes = ifData.ifi_obytes
                     
-                    if stat.has_previous, let lastTime = stat.last_time, (flags & IFF_UP) != 0 {
+                    if stat.hasPrevious, let lastTime = stat.lastTime, (flags & IFF_UP) != 0 {
                         let elapsed = now.timeIntervalSince(lastTime)
-                        stat.delta_ts_sec = NSNumber(value: elapsed)
+                        stat.deltaTimeSec = elapsed
                         
-                        if current_ibytes < stat.last_ifi_ibytes {
-                            stat.delta_ibytes = Int(Int64(current_ibytes) + Int64(UInt32.max) - Int64(stat.last_ifi_ibytes))
+                        // Handles counter overflow (UInt32 wrap-around) gracefully
+                        if current_ibytes < stat.lastInBytes {
+                            stat.deltaInBytes = Int(Int64(current_ibytes) + Int64(UInt32.max) - Int64(stat.lastInBytes))
                         } else {
-                            stat.delta_ibytes = Int(current_ibytes - stat.last_ifi_ibytes)
+                            stat.deltaInBytes = Int(current_ibytes - stat.lastInBytes)
                         }
                         
-                        if current_obytes < stat.last_ifi_obytes {
-                            stat.delta_obytes = Int(Int64(current_obytes) + Int64(UInt32.max) - Int64(stat.last_ifi_obytes))
+                        // Handles counter overflow (UInt32 wrap-around) gracefully
+                        if current_obytes < stat.lastOutBytes {
+                            stat.deltaOutBytes = Int(Int64(current_obytes) + Int64(UInt32.max) - Int64(stat.lastOutBytes))
                         } else {
-                            stat.delta_obytes = Int(current_obytes - stat.last_ifi_obytes)
+                            stat.deltaOutBytes = Int(current_obytes - stat.lastOutBytes)
                         }
                         
-                        let speedIn = Double(stat.delta_ibytes) / (elapsed + 1e-3)
-                        let speedOut = Double(stat.delta_obytes) / (elapsed + 1e-3)
+                        let speedIn = Double(stat.deltaInBytes) / (elapsed + 1e-3)
+                        let speedOut = Double(stat.deltaOutBytes) / (elapsed + 1e-3)
                         
                         if elapsed > 60.0 {
-                            stat.ibytes_per_sec = 0.0
-                            stat.obytes_per_sec = 0.0
+                            stat.inBytesPerSec = 0.0
+                            stat.outBytesPerSec = 0.0
                         } else {
-                            stat.ibytes_per_sec = NSNumber(value: speedIn)
-                            stat.obytes_per_sec = NSNumber(value: speedOut)
+                            stat.inBytesPerSec = speedIn
+                            stat.outBytesPerSec = speedOut
                         }
                     } else {
-                        stat.delta_ts_sec = 0.0
-                        stat.delta_ibytes = 0
-                        stat.delta_obytes = 0
-                        stat.ibytes_per_sec = 0.0
-                        stat.obytes_per_sec = 0.0
-                        stat.has_previous = true
+                        stat.deltaTimeSec = 0.0
+                        stat.deltaInBytes = 0
+                        stat.deltaOutBytes = 0
+                        stat.inBytesPerSec = 0.0
+                        stat.outBytesPerSec = 0.0
+                        stat.hasPrevious = true
                     }
                     
-                    stat.last_ifi_ibytes = current_ibytes
-                    stat.last_ifi_obytes = current_obytes
-                    stat.last_time = now
+                    stat.lastInBytes = current_ibytes
+                    stat.lastOutBytes = current_obytes
+                    stat.lastTime = now
+                    
+                    stats[name] = stat
                 }
             }
         }
         
-        return netTrafficStatMap
+        return stats
     }
 }
+
+
+/// Provides network interface traffic statistics.
+protocol NetworkTrafficProviding: Sendable {
+    func getSpeed(for interfaceName: String) async -> (upload: Double, download: Double)?
+    func reset() async
+}
+
+extension NetTrafficStatReceiver: NetworkTrafficProviding {}

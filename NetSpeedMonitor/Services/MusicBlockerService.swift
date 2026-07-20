@@ -1,8 +1,13 @@
 import AppKit
 import os.log
 
+/// Watches for Apple Music/iTunes launches and terminates them automatically.
+/// Optionally launches a replacement app or opens a website.
+/// Monitors media Play key presses to intercept music playback attempts.
+/// Uses 2-stage termination: graceful first, force-terminate after 500ms timeout.
 @MainActor
 final class MusicBlockerService {
+    /// Events emitted by the blocker service for status updates.
     enum Event {
         case ready
         case blocked(String)
@@ -50,11 +55,13 @@ final class MusicBlockerService {
         }
     }
 
+    /// Starts the service with the given enabled state and replacement value.
     func start(isEnabled: Bool, replacementValue: String) {
         updateReplacement(replacementValue)
         setEnabled(isEnabled)
     }
 
+    /// Sets whether the music blocker is enabled or not.
     func setEnabled(_ newValue: Bool) {
         isEnabled = newValue
         updateObserverState()
@@ -127,6 +134,8 @@ final class MusicBlockerService {
         blockRunningMusicApplications()
     }
 
+    /// Blocks the specified application using a 2-level asyncAfter flow:
+    /// Graceful termination first, followed by a forced termination if it hasn't exited after 500ms.
     private func block(_ application: NSRunningApplication) {
         let processIdentifier = application.processIdentifier
         guard !application.isTerminated,

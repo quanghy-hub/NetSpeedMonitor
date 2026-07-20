@@ -4,6 +4,7 @@ final class MenuBarIconGenerator {
 
     // MARK: - Original Text Icon (Template)
 
+    /// Generates a simple template image rendering text for the menu bar icon.
     static func generateIcon(
         text: String,
         font: NSFont = .monospacedSystemFont(ofSize: 9.5, weight: .semibold)
@@ -41,7 +42,8 @@ final class MenuBarIconGenerator {
 
     // MARK: - Vertical Bar Icon (Battery-style)
 
-    /// Draws a single vertical bar indicator, similar to macOS battery icon but vertical
+    /// Draws a single vertical bar indicator, similar to macOS battery icon but vertical.
+    /// Implements a fill-from-bottom pattern based on percentage with color thresholds.
     private static func drawVerticalBar(
         in context: CGContext,
         rect: CGRect,
@@ -99,6 +101,8 @@ final class MenuBarIconGenerator {
 
     // MARK: - Combined Icon (Bars + Text)
 
+    /// Generates a combined icon composed of vertical bars (CPU, RAM, Battery) and text.
+    /// Properly handles dark/light mode appearance by reading the current drawing context.
     static func generateCombinedIcon(
         text: String,
         cpuUsage: Double,
@@ -145,6 +149,8 @@ final class MenuBarIconGenerator {
 
         // Generate a single non-template image, but inside the draw handler we read the current appearance context!
         let image = NSImage(size: NSSize(width: totalWidth, height: menuBarHeight), flipped: false) { rect in
+            guard let context = NSGraphicsContext.current?.cgContext else { return true }
+
             // Get the current drawing appearance context set by the system (menu bar)
             let menuBarAppearance = NSAppearance.currentDrawing()
             let isDark = menuBarAppearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
@@ -157,44 +163,44 @@ final class MenuBarIconGenerator {
 
             if showCPU {
                 let cpuRect = CGRect(x: xOffset, y: 0, width: barSlotWidth, height: menuBarHeight)
-                NSGraphicsContext.current?.cgContext.saveGState()
+                context.saveGState()
                 MenuBarIconGenerator.drawVerticalBar(
-                    in: NSGraphicsContext.current!.cgContext,
+                    in: context,
                     rect: cpuRect,
                     percentage: cpuUsage,
                     fillColor: cpuColor,
                     borderColor: foregroundColor
                 )
-                NSGraphicsContext.current?.cgContext.restoreGState()
+                context.restoreGState()
                 xOffset += barSlotWidth + spacing
             }
 
             if showRAM {
                 let ramRect = CGRect(x: xOffset, y: 0, width: barSlotWidth, height: menuBarHeight)
-                NSGraphicsContext.current?.cgContext.saveGState()
+                context.saveGState()
                 MenuBarIconGenerator.drawVerticalBar(
-                    in: NSGraphicsContext.current!.cgContext,
+                    in: context,
                     rect: ramRect,
                     percentage: ramUsage,
                     fillColor: ramColor,
                     borderColor: foregroundColor
                 )
-                NSGraphicsContext.current?.cgContext.restoreGState()
+                context.restoreGState()
                 xOffset += barSlotWidth + spacing
             }
 
             if showBattery {
                 let batteryRect = CGRect(x: xOffset, y: 0, width: barSlotWidth, height: menuBarHeight)
-                NSGraphicsContext.current?.cgContext.saveGState()
+                context.saveGState()
                 BatteryBarRenderer.draw(
-                    in: NSGraphicsContext.current!.cgContext,
+                    in: context,
                     rect: batteryRect,
                     percentage: batteryLevel,
                     isCharging: batteryIsCharging,
                     fillColor: batteryColor,
                     foregroundColor: foregroundColor
                 )
-                NSGraphicsContext.current?.cgContext.restoreGState()
+                context.restoreGState()
                 xOffset += barSlotWidth
             }
 

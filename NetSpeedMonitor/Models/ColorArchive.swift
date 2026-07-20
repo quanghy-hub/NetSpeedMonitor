@@ -2,10 +2,14 @@ import AppKit
 
 enum ColorArchive {
     static func encode(_ color: NSColor) -> String? {
-        guard let data = try? NSKeyedArchiver.archivedData(
-            withRootObject: color,
-            requiringSecureCoding: true
-        ) else {
+        let data: Data
+        do {
+            data = try NSKeyedArchiver.archivedData(
+                withRootObject: color,
+                requiringSecureCoding: true
+            )
+        } catch {
+            logger.warning("Failed to archive color: \(error.localizedDescription)")
             return nil
         }
         return data.base64EncodedString()
@@ -16,7 +20,12 @@ enum ColorArchive {
               let data = Data(base64Encoded: value) else {
             return nil
         }
-        return try? NSKeyedUnarchiver.unarchivedObject(ofClass: NSColor.self, from: data)
+        do {
+            return try NSKeyedUnarchiver.unarchivedObject(ofClass: NSColor.self, from: data)
+        } catch {
+            logger.warning("Failed to unarchive color: \(error.localizedDescription)")
+            return nil
+        }
     }
 
     static func resolve(_ value: String, fallbackHex: String) -> NSColor {

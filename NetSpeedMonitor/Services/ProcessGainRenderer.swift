@@ -2,15 +2,20 @@ import Accelerate
 import AudioToolbox
 import CoreAudio
 import Foundation
+import os
 
-protocol ProcessGainRendering: AnyObject {
+protocol ProcessGainRendering: AnyObject, Sendable {
     var audioObjectIDs: [UInt32] { get }
     var gain: Float { get set }
     func stop()
 }
 
+/// This creates a CoreAudio process tap to intercept audio from target processes.
+/// It uses an aggregate device combining the output device with the tap.
+/// The IOProc callback scales audio samples using vDSP for real-time performance.
+/// GainState uses os_unfair_lock for thread-safe cross-thread access.
 @available(macOS 14.4, *)
-final class ProcessGainRenderer: ProcessGainRendering {
+final class ProcessGainRenderer: ProcessGainRendering, @unchecked Sendable {
     let audioObjectIDs: [UInt32]
     
     var gain: Float {
@@ -18,10 +23,27 @@ final class ProcessGainRenderer: ProcessGainRendering {
         set { gainState.value = min(max(newValue, 0), maxGain) }
     }
     
-    private final class GainState {
-        var value: Float
+    /// GainState uses @unchecked Sendable + lock pattern to safely allow cross-thread access
+    /// to the gain value from the IOProc callback and main thread.
+    private final class GainState: @unchecked Sendable {
+        private var _value: Float
+        private var lock = os_unfair_lock()
+
         init(value: Float) {
-            self.value = value
+            self._value = value
+        }
+
+        var value: Float {
+            get {
+                os_unfair_lock_lock(&lock)
+                defer { os_unfair_lock_unlock(&lock) }
+                return _value
+            }
+            set {
+                os_unfair_lock_lock(&lock)
+                _value = newValue
+                os_unfair_lock_unlock(&lock)
+            }
         }
     }
     
@@ -31,6 +53,12 @@ final class ProcessGainRenderer: ProcessGainRendering {
     private var aggregateID = AudioObjectID(0)
     private var ioProc: AudioDeviceIOProcID?
     
+    /// Initializes the process gain renderer.
+    /// - Parameters:
+    ///   - audioObjectIDs: The target processes to intercept.
+    ///   - gain: The initial gain multiplier.
+    ///   - maxGain: The maximum allowed gain multiplier.
+    /// - Returns: Nil if there is a failure in creating the tap, aggregate device, or starting rendering.
     init?(audioObjectIDs: [UInt32], gain: Float, maxGain: Float) {
         self.audioObjectIDs = audioObjectIDs.sorted()
         self.maxGain = maxGain
@@ -64,6 +92,8 @@ final class ProcessGainRenderer: ProcessGainRendering {
         }
     }
     
+    /// Stops the renderer and performs cleanup.
+    /// Cleanup order: stops and destroys IOProc, then aggregate device, then tap device.
     func stop() {
         if let ioProc {
             AudioDeviceStop(aggregateID, ioProc)
@@ -108,6 +138,9 @@ final class ProcessGainRenderer: ProcessGainRendering {
         return true
     }
     
+    /// Starts the IOProc callback flow.
+    /// The callback intercepts input buffers from the tap, scales audio samples using vDSP,
+    /// and writes the result to output buffers for real-time performance.
     private func startRendering() -> Bool {
         let state = gainState
         let created = AudioDeviceCreateIOProcIDWithBlock(&ioProc, aggregateID, nil) { _, input, _, output, _ in

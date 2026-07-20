@@ -17,6 +17,17 @@ struct AudioMixerItem: Identifiable, Hashable {
     let volume: Double
     let maxVolume: Double
     let audioObjectIDs: [UInt32]
+
+    /// Returns a copy of this item with only the volume replaced.
+    func withVolume(_ newVolume: Double) -> AudioMixerItem {
+        AudioMixerItem(
+            id: id, kind: kind, processID: processID,
+            bundleIdentifier: bundleIdentifier, title: title,
+            subtitle: subtitle, isAudible: isAudible,
+            canSetVolume: canSetVolume, volume: newVolume,
+            maxVolume: maxVolume, audioObjectIDs: audioObjectIDs
+        )
+    }
 }
 
 struct BrowserAudioTab: Identifiable, Hashable {

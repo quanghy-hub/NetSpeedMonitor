@@ -1,8 +1,9 @@
 import Foundation
 
+@MainActor
 final class ProcessVolumeEngine {
     static let shared = ProcessVolumeEngine()
-    static let maxVolume = 2.0
+    nonisolated static let maxVolume = 2.0
     
     private var engines: [String: ProcessGainRendering] = [:]
     private var buildTokens: [String: UUID] = [:]
@@ -12,13 +13,6 @@ final class ProcessVolumeEngine {
     private init() {}
     
     func apply(volume: Double, targetID: String, audioObjectIDs: [UInt32]) {
-        guard Thread.isMainThread else {
-            DispatchQueue.main.async {
-                self.apply(volume: volume, targetID: targetID, audioObjectIDs: audioObjectIDs)
-            }
-            return
-        }
-        
         let clamped = Self.clamp(volume)
         if isPassthrough(clamped) || audioObjectIDs.isEmpty {
             pendingRequests.removeValue(forKey: targetID)
@@ -88,13 +82,6 @@ final class ProcessVolumeEngine {
     }
     
     func reconcile(activeTargets: [String: [UInt32]]) {
-        guard Thread.isMainThread else {
-            DispatchQueue.main.async {
-                self.reconcile(activeTargets: activeTargets)
-            }
-            return
-        }
-        
         for (targetID, engine) in Array(engines) where activeTargets[targetID] != engine.audioObjectIDs {
             engines.removeValue(forKey: targetID)
             buildTokens.removeValue(forKey: targetID)
@@ -104,13 +91,6 @@ final class ProcessVolumeEngine {
     }
     
     func stopAll() {
-        guard Thread.isMainThread else {
-            DispatchQueue.main.async {
-                self.stopAll()
-            }
-            return
-        }
-        
         for engine in engines.values {
             stopOffMain(engine)
         }

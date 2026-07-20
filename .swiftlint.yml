@@ -1,0 +1,16 @@
+disabled_rules:
+  - trailing_whitespace
+  - line_length
+  - type_body_length
+  - file_length
+
+opt_in_rules:
+  - empty_count
+  - closure_spacing
+
+excluded:
+  - build/
+  - dist/
+  - .build/
+
+reporter: xcode

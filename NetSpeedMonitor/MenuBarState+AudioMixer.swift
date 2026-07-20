@@ -18,19 +18,7 @@ extension MenuBarState {
         guard let index = audioMixerItems.firstIndex(where: { $0.id == itemID }) else { return }
         let item = audioMixerItems[index]
         let clampedVolume = min(max(volume, 0), item.maxVolume)
-        let updatedItem = AudioMixerItem(
-            id: item.id,
-            kind: item.kind,
-            processID: item.processID,
-            bundleIdentifier: item.bundleIdentifier,
-            title: item.title,
-            subtitle: item.subtitle,
-            isAudible: item.isAudible,
-            canSetVolume: item.canSetVolume,
-            volume: clampedVolume,
-            maxVolume: item.maxVolume,
-            audioObjectIDs: item.audioObjectIDs
-        )
+        let updatedItem = item.withVolume(clampedVolume)
         audioMixerItems[index] = updatedItem
 
         audioCommitTasks[itemID]?.cancel()

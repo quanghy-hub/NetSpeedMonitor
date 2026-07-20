@@ -1,5 +1,9 @@
 import SwiftUI
 
+/// Central ViewModel for the menu bar app, using @Observable pattern.
+/// Coordinates timer-based polling, icon rendering, audio mixer, and music blocker.
+/// Properties use @AppStorage for UserDefaults persistence with didSet side effects.
+/// Dependencies are injected via protocols for testability.
 @MainActor
 final class MenuBarState: ObservableObject {
     @AppStorage("AutoLaunchEnabled") var autoLaunchEnabled: Bool = false {
@@ -97,9 +101,9 @@ final class MenuBarState: ObservableObject {
 
     var timer: DispatchSourceTimer?
     var lastIconSignature = ""
-    let netTrafficStat: NetTrafficStatReceiver
-    let systemStatsMonitor: SystemStatsMonitor
-    let audioSessionCatalog: AudioSessionCatalog
+    let netTrafficStat: any NetworkTrafficProviding
+    let systemStatsMonitor: any SystemStatsProviding
+    let audioSessionCatalog: any AudioSessionProviding
     let autoLaunchManager: AutoLaunchManager
     let networkInterfaceManager: NetworkInterfaceManager
     let musicBlockerService: MusicBlockerService
@@ -110,9 +114,9 @@ final class MenuBarState: ObservableObject {
         autoLaunchManager: AutoLaunchManager,
         networkInterfaceManager: NetworkInterfaceManager,
         musicBlockerService: MusicBlockerService,
-        systemStatsMonitor: SystemStatsMonitor,
-        netTrafficStat: NetTrafficStatReceiver,
-        audioSessionCatalog: AudioSessionCatalog
+        systemStatsMonitor: any SystemStatsProviding,
+        netTrafficStat: any NetworkTrafficProviding,
+        audioSessionCatalog: any AudioSessionProviding
     ) {
         self.autoLaunchManager = autoLaunchManager
         self.networkInterfaceManager = networkInterfaceManager
